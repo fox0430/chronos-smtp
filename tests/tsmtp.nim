@@ -2,7 +2,7 @@ import std/unittest
 
 import pkg/chronos
 
-import ../src/smtp {.all.}
+import ../chronos_smtp {.all.}
 
 suite "sendMail":
   test "Basic":

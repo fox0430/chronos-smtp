@@ -4,8 +4,7 @@ version       = "0.1.0"
 author        = "fox0430"
 description   = "SMTP client implementation using chronos"
 license       = "MIT"
-srcDir        = "src"
-bin           = @["smtp"]
+bin           = @["chronos_smtp"]
 
 
 # Dependencies
