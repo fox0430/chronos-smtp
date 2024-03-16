@@ -26,7 +26,7 @@ jobs:
         key: ${{ runner.os }}-choosenim-${{ env.NIM_VERSION }}
 
     - uses: jiro4989/setup-nim-action@v1
-    - run: nimble doc src/smtp
+    - run: nimble doc src/smtp -y
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       with:
