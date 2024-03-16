@@ -170,7 +170,6 @@ proc readEhlo(smtp: Smtp): Future[bool] {.async.} =
     else: return false
 
 proc ehlo*(smtp: Smtp): Future[bool] {.async.} =
-  echo "send EHLO"
   ## Sends EHLO request.
   await smtp.debugSend("EHLO " & smtp.hostname & "\c\L")
   return await smtp.readEhlo
