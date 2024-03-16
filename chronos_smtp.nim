@@ -141,7 +141,7 @@ proc `$`*(msg: Message): string =
   result.add("\c\L")
   result.add(msg.msgBody)
 
-proc newSmtp(debug: bool = true, useTls: bool = false): Smtp =
+proc newSmtp*(debug: bool = true, useTls: bool = false): Smtp =
   if useTls:
     return Smtp(debug: debug, kind: SmtpClientScheme.Secure)
   else:
