@@ -1,6 +1,20 @@
 name: Unit tests
 
-on: push
+on:
+  push:
+    paths:
+      - '.github/workflows/test.yaml'
+      - 'chronos_smtp.nimble'
+      - 'src/**'
+      - 'tests/**'
+    branches:
+      - master
+  pull_request:
+    paths:
+      - '.github/workflows/test.yaml'
+      - 'chronos_smtp.nimble'
+      - 'src/**'
+      - 'tests/**'
 
 permissions:
   contents: read
