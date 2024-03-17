@@ -261,21 +261,28 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   await smtp.debugSend("STARTTLS\c\L")
   await smtp.checkReply("220")
 
-  let tls = newTLSClientAsyncStream(
-    smtp.reader,
-    smtp.writer,
-    smtp.hostname,
-    flags = flags)
+  let
+    treader = newAsyncStreamReader(smtp.transp)
+    twriter = newAsyncStreamWriter(smtp.transp)
+    tls = newTLSClientAsyncStream(
+      treader,
+      twriter,
+      smtp.hostname,
+      flags = flags)
 
   # Upgrade to TLS stream
-  var newSmtp = Smtp(kind: SmtpClientScheme.Secure)
-  newSmtp.transp = smtp.transp
-  newSmtp.treader = smtp.reader
-  newSmtp.twriter = smtp.writer
-  newSmtp.reader = tls.reader
-  newSmtp.writer = tls.writer
-  newSmtp.tls = tls
-  newSmtp.flags = flags
+  var newSmtp = Smtp(
+    kind: SmtpClientScheme.Secure,
+    transp: smtp.transp,
+    treader: treader,
+    twriter: twriter,
+    tls: tls,
+    reader: tls.reader,
+    writer: tls.writer,
+    flags: flags,
+    hostname: smtp.hostname,
+    port: smtp.port,
+    debug: smtp.debug)
   smtp[] = newSmtp[]
 
   let speaksEsmtp = await smtp.ehlo
