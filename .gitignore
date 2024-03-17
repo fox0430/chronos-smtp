@@ -1,1 +1,4 @@
 chronos_smtp
+
+tests/*
+!tests/*.*
