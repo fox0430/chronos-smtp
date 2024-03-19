@@ -81,7 +81,7 @@ proc vrfyCommand*(param: string): string {.inline.} =
 proc expnCommand*(param: string): string {.inline.} =
   "EXPN " & param & "\c\L"
 
-proc resetCommand*(param: string): string {.inline.} =
+proc resetCommand*(): string {.inline.} =
   "RESET\c\L"
 
 proc authCommand*(): string {.inline.} =
