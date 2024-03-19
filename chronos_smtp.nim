@@ -45,6 +45,48 @@ type
     port: Port
     debug: bool
 
+proc heloCommand(param: string): string {.inline.} =
+  "HELO " & param & "\c\L"
+
+proc ehloCommand*(param: string): string {.inline.} =
+  "EHLO " & param & "\c\L"
+
+proc lhloCommand*(param: string): string {.inline.} =
+  "LHLO " & param & "\c\L"
+
+proc starttlsCommand*(): string {.inline.} =
+  "STARTTLS\c\L"
+
+proc mailCommand*(param: string): string {.inline.} =
+  "MAIL FROM:<" & param & ">\c\L"
+
+proc rcptCommand*(param: string): string {.inline.} =
+  "RCPT TO:<" & param & ">\c\L"
+
+proc dataCommand*(): string {.inline.} =
+  "DATA\c\L"
+
+proc quitComand*(): string {.inline.} =
+  "QUIT\c\L"
+
+proc noopCommand*(): string {.inline.} =
+  "NOOP\c\L"
+
+proc helpCommand*(param: string): string {.inline.} =
+  "HELP " & param & "\c\L"
+
+proc vrfyCommand*(param: string): string {.inline.} =
+  "VRFY " & param & "\c\L"
+
+proc expnCommand*(param: string): string {.inline.} =
+  "EXPN " & param & "\c\L"
+
+proc resetCommand*(param: string): string {.inline.} =
+  "RESET\c\L"
+
+proc authCommand*(): string {.inline.} =
+  "AUTH LOGIN\c\L"
+
 proc containsNewline(xs: seq[string]): bool =
   for x in xs:
     if x.contains({'\c', '\L'}):
@@ -84,7 +126,7 @@ proc debugRead*(smtp: Smtp): Future[string] {.async.} =
     echo("S:" & result)
 
 proc quitExcpt(smtp: Smtp, msg: string) {.async.} =
-  await smtp.debugSend("QUIT")
+  await smtp.debugSend(quitComand())
   raise newException(ReplyError, msg)
 
 proc createMessage*(
@@ -152,13 +194,13 @@ proc checkReply*(smtp: Smtp, reply: string) {.async.} =
   if not line.startsWith(reply):
     await quitExcpt(smtp, "Expected " & reply & " reply, got: " & line)
 
-proc helo*(smtp: Smtp, helo: string = "HELO") {.async.} =
-  await smtp.debugSend(helo & " " & smtp.hostname & "\c\L")
+proc helo*(smtp: Smtp) {.async.} =
+  await smtp.debugSend(heloCommand(smtp.hostname))
   await smtp.checkReply("250")
 
 proc lhlo*(smtp: Smtp) {.async.} =
   # Sends the LHLO request (for LMTP)
-  await smtp.helo("LHLO")
+  await smtp.debugSend(lhloCommand(smtp.hostname))
 
 proc readEhlo(smtp: Smtp): Future[bool] {.async.} =
   ## Skips "250-" lines, read until "250 " found.
@@ -171,7 +213,7 @@ proc readEhlo(smtp: Smtp): Future[bool] {.async.} =
 
 proc ehlo*(smtp: Smtp): Future[bool] {.async.} =
   ## Sends EHLO request.
-  await smtp.debugSend("EHLO " & smtp.hostname & "\c\L")
+  await smtp.debugSend(ehloCommand(smtp.hostname))
   return await smtp.readEhlo
 
 proc connect*(
@@ -258,7 +300,7 @@ proc dial*(
 proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   ## Put the SMTP connection in TLS (Transport Layer Security) mode.
   ## May fail with ReplyError
-  await smtp.debugSend("STARTTLS\c\L")
+  await smtp.debugSend(starttlsCommand())
   await smtp.checkReply("220")
 
   let
@@ -294,7 +336,7 @@ proc auth*(smtp: Smtp, username, password: string) {.async.} =
   ## using `password`.
   ## May fail with ReplyError.
 
-  await smtp.debugSend("AUTH LOGIN\c\L")
+  await smtp.debugSend(authCommand())
   await smtp.checkReply("334") # TODO: Check whether it's asking for the "Username:"
                                # i.e "334 VXNlcm5hbWU6"
   await smtp.debugSend(encode(username) & "\c\L")
@@ -317,14 +359,14 @@ proc sendMail*(
     doAssert(not (toAddrs.containsNewline() or fromAddr.contains({'\c', '\L'})),
              "'toAddrs' and 'fromAddr' shouldn't contain any newline characters")
 
-    await smtp.debugSend("MAIL FROM:<" & fromAddr & ">\c\L")
+    await smtp.debugSend(mailCommand(fromAddr))
     await smtp.checkReply("250")
     for address in items(toAddrs):
-      await smtp.debugSend("RCPT TO:<" & address & ">\c\L")
+      await smtp.debugSend(rcptCommand(address))
       await smtp.checkReply("250")
 
     # Send the message
-    await smtp.debugSend("DATA" & "\c\L")
+    await smtp.debugSend(dataCommand())
     await smtp.checkReply("354")
     await smtp.debugSend(msg & "\c\L")
     await smtp.debugSend(".\c\L")
@@ -332,5 +374,5 @@ proc sendMail*(
 
 proc close*(smtp: Smtp) {.async.} =
   ## Disconnects from the SMTP server and closes the socket.
-  await smtp.debugSend("QUIT\c\L")
+  await smtp.debugSend(quitComand())
   if smtp.transp != nil: smtp.transp.close()
