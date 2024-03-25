@@ -118,11 +118,9 @@
 
 </ul>
 <ul class="simple nested-toc-section">dial
-  <li><a class="reference" href="#dial%2Cstring%2CPort%2Cbool%2Cset%5BTLSFlags%5D%2Cbool%2Cbool" title="dial(hostname: string; port: Port; useTls: bool = false;
-     flags: set[TLSFlags] = {}; debug: bool = true; helo: bool = true): Future[
-    Smtp]">dial(hostname: string; port: Port; useTls: bool = false;
-     flags: set[TLSFlags] = {}; debug: bool = true; helo: bool = true): Future[
-    Smtp]</a></li>
+  <li><a class="reference" href="#dial%2Cstring%2CPort%2Cbool%2Cset%5BTLSFlags%5D%2Cbool" title="dial(hostname: string; port: Port; useTls: bool = false;
+     flags: set[TLSFlags] = {}; helo: bool = true): Future[Smtp]">dial(hostname: string; port: Port; useTls: bool = false;
+     flags: set[TLSFlags] = {}; helo: bool = true): Future[Smtp]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">ehlo
@@ -158,7 +156,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">newSmtp
-  <li><a class="reference" href="#newSmtp%2Cbool%2Cbool" title="newSmtp(debug: bool = true; useTls: bool = false): Smtp">newSmtp(debug: bool = true; useTls: bool = false): Smtp</a></li>
+  <li><a class="reference" href="#newSmtp%2Cbool" title="newSmtp(useTls: bool = false): Smtp">newSmtp(useTls: bool = false): Smtp</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">noopCommand
@@ -382,7 +380,7 @@
   <dd>
     
     <p>Receives a line of data from the socket connected to the SMTP server.</p>
-<p>If the <tt class="docutils literal"><span class="pre"><span class="Identifier">smtp</span></span></tt> object was created with <tt class="docutils literal"><span class="pre"><span class="Identifier">debug</span></span></tt> enabled, debugRead will invoke <tt class="docutils literal"><span class="pre"><span class="Identifier">echo</span><span class="Punctuation">(</span><span class="StringLit">&quot;S:&quot;</span> <span class="Operator">&amp;</span> <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">string</span><span class="Punctuation">)</span></span></tt> after the data is received.</p>
+<p>If the <tt class="docutils literal"><span class="pre"><span class="Identifier">smtp</span></span></tt> object was created with <tt class="docutils literal"><span class="pre"><span class="Identifier">debug</span></span></tt> enabled, debugRead will invoke <tt class="docutils literal"><span class="pre"><span class="Identifier">debug</span> <span class="StringLit">&quot;S:&quot;</span> <span class="Operator">&amp;</span> <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">string</span></span></tt> after the data is received.</p>
 <p>This is a lower level proc and not something that you typically would need to call when using this module. One exception to this is if you are implementing any <a class="reference external" href="https://en.wikipedia.org/wiki/Extended_SMTP">SMTP extensions</a>.</p>
 <p>See <a class="reference external" href="#checkReply,AsyncSmtp,string">checkReply(reply)</a>.</p>
 
@@ -398,7 +396,7 @@
   <dd>
     
     <p>Sends <tt class="docutils literal"><span class="pre"><span class="Identifier">cmd</span></span></tt> on the socket connected to the SMTP server.</p>
-<p>If the <tt class="docutils literal"><span class="pre"><span class="Identifier">smtp</span></span></tt> object was created with <tt class="docutils literal"><span class="pre"><span class="Identifier">debug</span></span></tt> enabled, debugSend will invoke <tt class="docutils literal"><span class="pre"><span class="Identifier">echo</span><span class="Punctuation">(</span><span class="StringLit">&quot;C:&quot;</span> <span class="Operator">&amp;</span> <span class="Identifier">cmd</span><span class="Punctuation">)</span></span></tt> before sending.</p>
+<p>If the <tt class="docutils literal"><span class="pre"><span class="Identifier">smtp</span></span></tt> object was created with <tt class="docutils literal"><span class="pre"><span class="Identifier">debug</span></span></tt> enabled, debugSend will invoke <tt class="docutils literal"><span class="pre"><span class="Identifier">debug</span> <span class="StringLit">&quot;C:&quot;</span> <span class="Operator">&amp;</span> <span class="Identifier">cmd</span></span></tt> before sending.</p>
 <p>This is a lower level proc and not something that you typically would need to call when using this module. One exception to this is if you are implementing any <a class="reference external" href="https://en.wikipedia.org/wiki/Extended_SMTP">SMTP extensions</a>.</p>
 
     
@@ -407,11 +405,10 @@
 
 </div>
 <div id="dial-procs-all">
-  <div id="dial,string,Port,bool,set[TLSFlags],bool,bool">
-  <dt><pre><span class="Keyword">proc</span> <a href="#dial%2Cstring%2CPort%2Cbool%2Cset%5BTLSFlags%5D%2Cbool%2Cbool"><span class="Identifier">dial</span></a><span class="Other">(</span><span class="Identifier">hostname</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <span class="Identifier">Port</span><span class="Other">;</span> <span class="Identifier">useTls</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
-          <span class="Identifier">flags</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><span class="Identifier">TLSFlags</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">;</span> <span class="Identifier">debug</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span> <span class="Identifier">helo</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span>
-    <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span>
-            <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="dial,string,Port,bool,set[TLSFlags],bool">
+  <dt><pre><span class="Keyword">proc</span> <a href="#dial%2Cstring%2CPort%2Cbool%2Cset%5BTLSFlags%5D%2Cbool"><span class="Identifier">dial</span></a><span class="Other">(</span><span class="Identifier">hostname</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <span class="Identifier">Port</span><span class="Other">;</span> <span class="Identifier">useTls</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
+          <span class="Identifier">flags</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><span class="Identifier">TLSFlags</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">;</span> <span class="Identifier">helo</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -517,9 +514,8 @@
 
 </div>
 <div id="newSmtp-procs-all">
-  <div id="newSmtp,bool,bool">
-  <dt><pre><span class="Keyword">proc</span> <a href="#newSmtp%2Cbool%2Cbool"><span class="Identifier">newSmtp</span></a><span class="Other">(</span><span class="Identifier">debug</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span> <span class="Identifier">useTls</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="newSmtp,bool">
+  <dt><pre><span class="Keyword">proc</span> <a href="#newSmtp%2Cbool"><span class="Identifier">newSmtp</span></a><span class="Other">(</span><span class="Identifier">useTls</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -633,7 +629,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2024-03-19 18:19:33 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-03-25 15:53:28 UTC</small>
       </div>
     </div>
   </div>
