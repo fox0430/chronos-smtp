@@ -10,7 +10,8 @@ import
   pkg/chronos,
   pkg/chronos/streams/tlsstream,
   pkg/chronos/transports/common,
-  pkg/chronos/transports/stream
+  pkg/chronos/transports/stream,
+  pkg/chronicles
 
 export chronos, Port, TLSFlags
 
@@ -43,7 +44,6 @@ type
     writer: AsyncStreamWriter
     hostname: string
     port: Port
-    debug: bool
 
 proc heloCommand(param: string): string {.inline.} =
   "HELO " & param & "\c\L"
@@ -96,15 +96,14 @@ proc debugSend*(smtp: Smtp, cmd: string) {.async.} =
   ## Sends `cmd` on the socket connected to the SMTP server.
   ##
   ## If the `smtp` object was created with `debug` enabled,
-  ## debugSend will invoke `echo("C:" & cmd)` before sending.
+  ## debugSend will invoke `debug "C:" & cmd` before sending.
   ##
   ## This is a lower level proc and not something that you typically
   ## would need to call when using this module. One exception to
   ## this is if you are implementing any
   ## `SMTP extensions<https://en.wikipedia.org/wiki/Extended_SMTP>`_.
 
-  if smtp.debug:
-    echo("C:" & cmd)
+  debug "Client:", cmd
   await smtp.writer.write(cmd)
 
 proc debugRead*(smtp: Smtp): Future[string] {.async.} =
@@ -112,7 +111,7 @@ proc debugRead*(smtp: Smtp): Future[string] {.async.} =
   ## SMTP server.
   ##
   ## If the `smtp` object was created with `debug` enabled,
-  ## debugRead will invoke `echo("S:" & result.string)` after
+  ## debugRead will invoke `debug "S:" & result.string` after
   ## the data is received.
   ##
   ## This is a lower level proc and not something that you typically
@@ -122,8 +121,7 @@ proc debugRead*(smtp: Smtp): Future[string] {.async.} =
   ##
   ## See `checkReply(reply)<#checkReply,AsyncSmtp,string>`_.
   result = await smtp.reader.readLine
-  if smtp.debug:
-    echo("S:" & result)
+  debug "Server:", result
 
 proc quitExcpt(smtp: Smtp, msg: string) {.async.} =
   await smtp.debugSend(quitComand())
@@ -183,11 +181,11 @@ proc `$`*(msg: Message): string =
   result.add("\c\L")
   result.add(msg.msgBody)
 
-proc newSmtp*(debug: bool = true, useTls: bool = false): Smtp =
+proc newSmtp*(useTls: bool = false): Smtp =
   if useTls:
-    return Smtp(debug: debug, kind: SmtpClientScheme.Secure)
+    return Smtp(kind: SmtpClientScheme.Secure)
   else:
-    return Smtp(debug: debug, kind: SmtpClientScheme.NonSecure)
+    return Smtp(kind: SmtpClientScheme.NonSecure)
 
 proc checkReply*(smtp: Smtp, reply: string) {.async.} =
   let line = await smtp.debugRead
@@ -291,10 +289,9 @@ proc dial*(
   port: Port,
   useTls: bool = false,
   flags: set[TLSFlags] = {},
-  debug: bool = true,
   helo: bool = true): Future[Smtp] {.async.} =
 
-    result = newSmtp(debug, useTls)
+    result = newSmtp(useTls)
     await result.connect(hostname, port, flags, helo)
 
 proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
@@ -323,8 +320,7 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
     writer: tls.writer,
     flags: flags,
     hostname: smtp.hostname,
-    port: smtp.port,
-    debug: smtp.debug)
+    port: smtp.port)
   smtp[] = newSmtp[]
 
   let speaksEsmtp = await smtp.ehlo

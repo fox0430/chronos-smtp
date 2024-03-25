@@ -6,7 +6,7 @@ import ../chronos_smtp {.all.}
 
 suite "sendMail":
   test "Basic":
-    var conn = newSmtp(debug = false)
+    var conn = newSmtp()
     waitFor conn.connect("localhost", 2525.Port)
 
     let msg = createMessage(
@@ -16,7 +16,7 @@ suite "sendMail":
     waitFor conn.sendmail("username@gmail.com", @["foo@gmail.com"], $msg)
 
   test "Basic 2":
-    var conn = waitFor dial("localhost", 2525.Port, debug = false)
+    var conn = waitFor dial("localhost", 2525.Port)
 
     let msg = createMessage(
       "Hello from Nim's SMTP",
