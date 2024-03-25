@@ -10,7 +10,8 @@ import
   pkg/chronos,
   pkg/chronos/streams/tlsstream,
   pkg/chronos/transports/common,
-  pkg/chronos/transports/stream
+  pkg/chronos/transports/stream,
+  pkg/chronicles
 
 export chronos, Port, TLSFlags
 
@@ -96,7 +97,7 @@ proc debugSend*(smtp: Smtp, cmd: string) {.async.} =
   ## Sends `cmd` on the socket connected to the SMTP server.
   ##
   ## If the `smtp` object was created with `debug` enabled,
-  ## debugSend will invoke `echo("C:" & cmd)` before sending.
+  ## debugSend will invoke `debug "C:" & cmd` before sending.
   ##
   ## This is a lower level proc and not something that you typically
   ## would need to call when using this module. One exception to
@@ -104,7 +105,7 @@ proc debugSend*(smtp: Smtp, cmd: string) {.async.} =
   ## `SMTP extensions<https://en.wikipedia.org/wiki/Extended_SMTP>`_.
 
   if smtp.debug:
-    echo("C:" & cmd)
+    debug "C:" & cmd
   await smtp.writer.write(cmd)
 
 proc debugRead*(smtp: Smtp): Future[string] {.async.} =
@@ -112,7 +113,7 @@ proc debugRead*(smtp: Smtp): Future[string] {.async.} =
   ## SMTP server.
   ##
   ## If the `smtp` object was created with `debug` enabled,
-  ## debugRead will invoke `echo("S:" & result.string)` after
+  ## debugRead will invoke `debug "S:" & result.string` after
   ## the data is received.
   ##
   ## This is a lower level proc and not something that you typically
@@ -123,7 +124,7 @@ proc debugRead*(smtp: Smtp): Future[string] {.async.} =
   ## See `checkReply(reply)<#checkReply,AsyncSmtp,string>`_.
   result = await smtp.reader.readLine
   if smtp.debug:
-    echo("S:" & result)
+    debug "S:" & result
 
 proc quitExcpt(smtp: Smtp, msg: string) {.async.} =
   await smtp.debugSend(quitComand())
