@@ -44,7 +44,6 @@ type
     writer: AsyncStreamWriter
     hostname: string
     port: Port
-    debug: bool
 
 proc heloCommand(param: string): string {.inline.} =
   "HELO " & param & "\c\L"
@@ -104,8 +103,7 @@ proc debugSend*(smtp: Smtp, cmd: string) {.async.} =
   ## this is if you are implementing any
   ## `SMTP extensions<https://en.wikipedia.org/wiki/Extended_SMTP>`_.
 
-  if smtp.debug:
-    debug "C:" & cmd
+  debug "Client:", cmd
   await smtp.writer.write(cmd)
 
 proc debugRead*(smtp: Smtp): Future[string] {.async.} =
@@ -123,8 +121,7 @@ proc debugRead*(smtp: Smtp): Future[string] {.async.} =
   ##
   ## See `checkReply(reply)<#checkReply,AsyncSmtp,string>`_.
   result = await smtp.reader.readLine
-  if smtp.debug:
-    debug "S:" & result
+  debug "Server:", result
 
 proc quitExcpt(smtp: Smtp, msg: string) {.async.} =
   await smtp.debugSend(quitComand())
@@ -184,11 +181,11 @@ proc `$`*(msg: Message): string =
   result.add("\c\L")
   result.add(msg.msgBody)
 
-proc newSmtp*(debug: bool = true, useTls: bool = false): Smtp =
+proc newSmtp*(useTls: bool = false): Smtp =
   if useTls:
-    return Smtp(debug: debug, kind: SmtpClientScheme.Secure)
+    return Smtp(kind: SmtpClientScheme.Secure)
   else:
-    return Smtp(debug: debug, kind: SmtpClientScheme.NonSecure)
+    return Smtp(kind: SmtpClientScheme.NonSecure)
 
 proc checkReply*(smtp: Smtp, reply: string) {.async.} =
   let line = await smtp.debugRead
@@ -292,10 +289,9 @@ proc dial*(
   port: Port,
   useTls: bool = false,
   flags: set[TLSFlags] = {},
-  debug: bool = true,
   helo: bool = true): Future[Smtp] {.async.} =
 
-    result = newSmtp(debug, useTls)
+    result = newSmtp(useTls)
     await result.connect(hostname, port, flags, helo)
 
 proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
@@ -324,8 +320,7 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
     writer: tls.writer,
     flags: flags,
     hostname: smtp.hostname,
-    port: smtp.port,
-    debug: smtp.debug)
+    port: smtp.port)
   smtp[] = newSmtp[]
 
   let speaksEsmtp = await smtp.ehlo
