@@ -1,7 +1,7 @@
 import pkg/chronos_smtp
 
 proc main() {.async.} =
-  var conn = newSmtp(debug = true, useTls = false)
+  var conn = newSmtp(useTls = false)
   await conn.connect("smtp.gmail.com", 587.Port)
   await conn.startTls
   await conn.auth("username", "password")
