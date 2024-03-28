@@ -45,7 +45,7 @@ type
     host*: string
     port*: Port
 
-proc heloCommand(param: string): string {.inline.} =
+proc heloCommand*(param: string): string {.inline.} =
   "HELO " & param & "\c\L"
 
 proc ehloCommand*(param: string): string {.inline.} =
