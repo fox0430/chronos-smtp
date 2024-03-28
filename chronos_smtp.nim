@@ -42,8 +42,8 @@ type
     transp: StreamTransport
     reader: AsyncStreamReader
     writer: AsyncStreamWriter
-    hostname: string
-    port: Port
+    host*: string
+    port*: Port
 
 proc heloCommand(param: string): string {.inline.} =
   "HELO " & param & "\c\L"
@@ -193,12 +193,12 @@ proc checkReply*(smtp: Smtp, reply: string) {.async.} =
     await quitExcpt(smtp, "Expected " & reply & " reply, got: " & line)
 
 proc helo*(smtp: Smtp) {.async.} =
-  await smtp.debugSend(heloCommand(smtp.hostname))
+  await smtp.debugSend(heloCommand(smtp.host))
   await smtp.checkReply("250")
 
 proc lhlo*(smtp: Smtp) {.async.} =
   # Sends the LHLO request (for LMTP)
-  await smtp.debugSend(lhloCommand(smtp.hostname))
+  await smtp.debugSend(lhloCommand(smtp.host))
 
 proc readEhlo(smtp: Smtp): Future[bool] {.async.} =
   ## Skips "250-" lines, read until "250 " found.
@@ -211,18 +211,18 @@ proc readEhlo(smtp: Smtp): Future[bool] {.async.} =
 
 proc ehlo*(smtp: Smtp): Future[bool] {.async.} =
   ## Sends EHLO request.
-  await smtp.debugSend(ehloCommand(smtp.hostname))
+  await smtp.debugSend(ehloCommand(smtp.host))
   return await smtp.readEhlo
 
 proc connect*(
   smtp: Smtp,
-  hostname: string,
+  host: string,
   port: Port,
   flags: set[TLSFlags] = {},
   helo: bool = true) {.async.} =
     ## Establishes a connection with a SMTP server.
 
-    let addresses = resolveTAddress(hostname, port)
+    let addresses = resolveTAddress(host, port)
     var lastError = ""
     for a in addresses:
       let transp =
@@ -236,7 +236,7 @@ proc connect*(
 
       if not transp.isNil:
         smtp.transp = transp
-        smtp.hostname = hostname
+        smtp.host = host
 
         case smtp.kind:
         of SmtpClientScheme.NonSecure:
@@ -252,7 +252,7 @@ proc connect*(
                 newTLSClientAsyncStream(
                   treader,
                   twriter,
-                  hostname,
+                  host,
                   flags = flags)
               except TLSStreamInitError as e:
                 lastError = e.msg
@@ -285,14 +285,14 @@ proc connect*(
         "Could not connect to remote host")
 
 proc dial*(
-  hostname: string,
+  host: string,
   port: Port,
   useTls: bool = false,
   flags: set[TLSFlags] = {},
   helo: bool = true): Future[Smtp] {.async.} =
 
     result = newSmtp(useTls)
-    await result.connect(hostname, port, flags, helo)
+    await result.connect(host, port, flags, helo)
 
 proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   ## Put the SMTP connection in TLS (Transport Layer Security) mode.
@@ -306,7 +306,7 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
     tls = newTLSClientAsyncStream(
       treader,
       twriter,
-      smtp.hostname,
+      smtp.host,
       flags = flags)
 
   # Upgrade to TLS stream
@@ -319,7 +319,7 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
     reader: tls.reader,
     writer: tls.writer,
     flags: flags,
-    hostname: smtp.hostname,
+    host: smtp.host,
     port: smtp.port)
   smtp[] = newSmtp[]
 
