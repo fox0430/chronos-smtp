@@ -15,7 +15,11 @@ suite "sendMail":
       @["foo@gmail.com"])
     waitFor conn.sendmail("username@gmail.com", @["foo@gmail.com"], $msg)
 
+    check not conn.closed
+
     waitFor conn.close
+
+    check conn.closed
 
   test "Basic 2":
     var conn = waitFor dial("localhost", 2525.Port)
@@ -26,4 +30,8 @@ suite "sendMail":
       @["foo@gmail.com"])
     waitFor conn.sendmail("username@gmail.com", @["foo@gmail.com"], $msg)
 
+    check not conn.closed
+
     waitFor conn.close
+
+    check conn.closed

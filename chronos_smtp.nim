@@ -31,6 +31,7 @@ type
   ReplyError* = object of IOError
 
   Smtp* = ref object
+    closed*: bool
     case kind*: SmtpClientScheme
     of SmtpClientScheme.NonSecure:
       discard
@@ -385,3 +386,5 @@ proc close*(smtp: Smtp) {.async.} =
   futs.add smtp.transp.closeWait
 
   if futs.len > 0: await noCancel(allFutures(futs))
+
+  smtp.closed = true
