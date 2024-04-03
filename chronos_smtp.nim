@@ -372,7 +372,7 @@ proc close*(smtp: Smtp) {.async.} =
   ## Disconnects from the SMTP server and closes the stream.
   await smtp.debugSend(quitComand())
 
-  var futs: seq[Future[()]]
+  var futs: seq[Future[void]]
   if not smtp.reader.isNil and not smtp.reader.closed:
     futs.add smtp.reader.closeWait
   if not smtp.writer.isNil and not smtp.writer.closed:
