@@ -15,6 +15,8 @@ suite "sendMail":
       @["foo@gmail.com"])
     waitFor conn.sendmail("username@gmail.com", @["foo@gmail.com"], $msg)
 
+    waitFor conn.close
+
   test "Basic 2":
     var conn = waitFor dial("localhost", 2525.Port)
 
@@ -23,3 +25,5 @@ suite "sendMail":
       "Hello!.\n Is this awesome or what?",
       @["foo@gmail.com"])
     waitFor conn.sendmail("username@gmail.com", @["foo@gmail.com"], $msg)
+
+    waitFor conn.close
