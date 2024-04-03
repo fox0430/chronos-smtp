@@ -31,17 +31,17 @@ type
   ReplyError* = object of IOError
 
   Smtp* = ref object
-    case kind: SmtpClientScheme
+    case kind*: SmtpClientScheme
     of SmtpClientScheme.NonSecure:
       discard
     of SmtpClientScheme.Secure:
-      treader: AsyncStreamReader
-      twriter: AsyncStreamWriter
-      tls: TLSAsyncStream
-      flags: set[TLSFlags]
-    transp: StreamTransport
-    reader: AsyncStreamReader
-    writer: AsyncStreamWriter
+      treader*: AsyncStreamReader
+      twriter*: AsyncStreamWriter
+      tls*: TLSAsyncStream
+      flags*: set[TLSFlags]
+    transp*: StreamTransport
+    reader*: AsyncStreamReader
+    writer*: AsyncStreamWriter
     host*: string
     port*: Port
 
