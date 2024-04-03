@@ -54,6 +54,7 @@
       <li><a class="reference" href="#Message" title="Message = object">Message</a></li>
 <li><a class="reference" href="#ReplyError" title="ReplyError = object of IOError">ReplyError</a></li>
 <li><a class="reference" href="#Smtp" title="Smtp = ref object
+  closed*: bool
   case kind*: SmtpClientScheme
   of SmtpClientScheme.NonSecure:
       nil
@@ -242,6 +243,7 @@
 </div>
 <div id="Smtp">
   <dt><pre><a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
+  <span class="Identifier">closed</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Keyword">case</span> <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="chronos_smtp.html#SmtpClientScheme"><span class="Identifier">SmtpClientScheme</span></a>
   <span class="Keyword">of</span> <span class="Identifier">SmtpClientScheme</span><span class="Other">.</span><span class="Identifier">NonSecure</span><span class="Other">:</span>
       <span class="Keyword">nil</span>
@@ -664,7 +666,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2024-04-03 17:38:22 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-04-03 18:30:55 UTC</small>
       </div>
     </div>
   </div>
