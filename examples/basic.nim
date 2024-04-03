@@ -10,5 +10,7 @@ proc main() {.async.} =
     @["foo@exmaple.com"])
   await conn.sendmail("username@exmaple.com", @["foo@exmaple.com"], $msg)
 
+  await conn.close
+
 when isMainModule:
   waitFor main()

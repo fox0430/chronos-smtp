@@ -369,6 +369,19 @@ proc sendMail*(
     await smtp.checkReply("250")
 
 proc close*(smtp: Smtp) {.async.} =
-  ## Disconnects from the SMTP server and closes the socket.
+  ## Disconnects from the SMTP server and closes the stream.
   await smtp.debugSend(quitComand())
-  if smtp.transp != nil: smtp.transp.close()
+
+  var futs: seq[Future[()]]
+  if not smtp.reader.isNil and not smtp.reader.closed:
+    futs.add smtp.reader.closeWait
+  if not smtp.writer.isNil and not smtp.writer.closed:
+    futs.add smtp.writer.closeWait
+  if smtp.kind == SmtpClientScheme.Secure:
+    if not smtp.treader.isNil and not smtp.treader.closed:
+      futs.add smtp.treader.closeWait
+    if not smtp.twriter.isNil and not smtp.twriter.closed:
+      futs.add smtp.twriter.closeWait
+  futs.add smtp.transp.closeWait
+
+  if futs.len > 0: await noCancel(allFutures(futs))
