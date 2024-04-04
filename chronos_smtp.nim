@@ -105,7 +105,7 @@ proc read*(smtp: Smtp): Future[string] {.async.} =
   while result.len > posi and result[posi + 3] == '-':
     let line = await smtp.reader.readLine
     result.add '\n' & line
-    posi += line.len
+    posi += line.len + 1
 
   debug "Server:", result
 
