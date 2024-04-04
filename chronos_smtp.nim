@@ -93,39 +93,28 @@ proc containsNewline(xs: seq[string]): bool =
     if x.contains({'\c', '\L'}):
       return true
 
-proc debugSend*(smtp: Smtp, cmd: string) {.async.} =
-  ## Sends `cmd` on the socket connected to the SMTP server.
-  ##
-  ## If the `smtp` object was created with `debug` enabled,
-  ## debugSend will invoke `debug "C:" & cmd` before sending.
-  ##
-  ## This is a lower level proc and not something that you typically
-  ## would need to call when using this module. One exception to
-  ## this is if you are implementing any
-  ## `SMTP extensions<https://en.wikipedia.org/wiki/Extended_SMTP>`_.
-
+proc send*(smtp: Smtp, cmd: string) {.async.} =
   debug "Client:", cmd
   await smtp.writer.write(cmd)
 
-proc debugRead*(smtp: Smtp): Future[string] {.async.} =
-  ## Receives a line of data from the socket connected to the
-  ## SMTP server.
-  ##
-  ## If the `smtp` object was created with `debug` enabled,
-  ## debugRead will invoke `debug "S:" & result.string` after
-  ## the data is received.
-  ##
-  ## This is a lower level proc and not something that you typically
-  ## would need to call when using this module. One exception to
-  ## this is if you are implementing any
-  ## `SMTP extensions<https://en.wikipedia.org/wiki/Extended_SMTP>`_.
-  ##
-  ## See `checkReply(reply)<#checkReply,AsyncSmtp,string>`_.
+proc read*(smtp: Smtp): Future[string] {.async.} =
+  ## Return all lines
+
+  result.add await smtp.reader.readLine
+  var posi = 0
+  while result.len > posi and result[posi + 3] == '-':
+    let line = await smtp.reader.readLine
+    result.add '\n' & line
+    posi += line.len
+
+  debug "Server:", result
+
+proc readLine*(smtp: Smtp): Future[string] {.async.} =
   result = await smtp.reader.readLine
   debug "Server:", result
 
 proc quitExcpt(smtp: Smtp, msg: string) {.async.} =
-  await smtp.debugSend(quitComand())
+  await smtp.send(quitComand())
   raise newException(ReplyError, msg)
 
 proc createMessage*(
@@ -189,30 +178,30 @@ proc newSmtp*(useTls: bool = false): Smtp =
     return Smtp(kind: SmtpClientScheme.NonSecure)
 
 proc checkReply*(smtp: Smtp, reply: string) {.async.} =
-  let line = await smtp.debugRead
+  let line = await smtp.read
   if not line.startsWith(reply):
     await quitExcpt(smtp, "Expected " & reply & " reply, got: " & line)
 
 proc helo*(smtp: Smtp) {.async.} =
-  await smtp.debugSend(heloCommand(smtp.host))
+  await smtp.send(heloCommand(smtp.host))
   await smtp.checkReply("250")
 
 proc lhlo*(smtp: Smtp) {.async.} =
   # Sends the LHLO request (for LMTP)
-  await smtp.debugSend(lhloCommand(smtp.host))
+  await smtp.send(lhloCommand(smtp.host))
 
 proc readEhlo(smtp: Smtp): Future[bool] {.async.} =
   ## Skips "250-" lines, read until "250 " found.
   ## Return `true` if server supports `EHLO`, false otherwise.
   while true:
-    var line = await smtp.debugRead
+    var line = await smtp.readLine
     if line.startsWith("250-"): continue
     elif line.startsWith("250 "): return true # last line
     else: return false
 
 proc ehlo*(smtp: Smtp): Future[bool] {.async.} =
   ## Sends EHLO request.
-  await smtp.debugSend(ehloCommand(smtp.host))
+  await smtp.send(ehloCommand(smtp.host))
   return await smtp.readEhlo
 
 proc connect*(
@@ -298,7 +287,7 @@ proc dial*(
 proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   ## Put the SMTP connection in TLS (Transport Layer Security) mode.
   ## May fail with ReplyError
-  await smtp.debugSend(starttlsCommand())
+  await smtp.send(starttlsCommand())
   await smtp.checkReply("220")
 
   let
@@ -333,13 +322,13 @@ proc auth*(smtp: Smtp, username, password: string) {.async.} =
   ## using `password`.
   ## May fail with ReplyError.
 
-  await smtp.debugSend(authCommand())
+  await smtp.send(authCommand())
   await smtp.checkReply("334") # TODO: Check whether it's asking for the "Username:"
                                # i.e "334 VXNlcm5hbWU6"
-  await smtp.debugSend(encode(username) & "\c\L")
+  await smtp.send(encode(username) & "\c\L")
   await smtp.checkReply("334") # TODO: Same as above, only "Password:" (I think?)
 
-  await smtp.debugSend(encode(password) & "\c\L")
+  await smtp.send(encode(password) & "\c\L")
   await smtp.checkReply("235") # Check whether the authentication was successful.
 
 proc sendMail*(
@@ -356,22 +345,22 @@ proc sendMail*(
     doAssert(not (toAddrs.containsNewline() or fromAddr.contains({'\c', '\L'})),
              "'toAddrs' and 'fromAddr' shouldn't contain any newline characters")
 
-    await smtp.debugSend(mailCommand(fromAddr))
+    await smtp.send(mailCommand(fromAddr))
     await smtp.checkReply("250")
     for address in items(toAddrs):
-      await smtp.debugSend(rcptCommand(address))
+      await smtp.send(rcptCommand(address))
       await smtp.checkReply("250")
 
     # Send the message
-    await smtp.debugSend(dataCommand())
+    await smtp.send(dataCommand())
     await smtp.checkReply("354")
-    await smtp.debugSend(msg & "\c\L")
-    await smtp.debugSend(".\c\L")
+    await smtp.send(msg & "\c\L")
+    await smtp.send(".\c\L")
     await smtp.checkReply("250")
 
 proc close*(smtp: Smtp) {.async.} =
   ## Disconnects from the SMTP server and closes the stream.
-  await smtp.debugSend(quitComand())
+  await smtp.send(quitComand())
 
   var futs: seq[Future[void]]
   if not smtp.reader.isNil and not smtp.reader.closed:
