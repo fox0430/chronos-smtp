@@ -238,6 +238,7 @@ proc connect*(
       if not transp.isNil:
         smtp.transp = transp
         smtp.host = host
+        smtp.port = port
 
         case smtp.kind:
         of SmtpClientScheme.NonSecure:
