@@ -219,8 +219,7 @@ proc connect*(
         try:
           await connect(a)
         except CancelledError as e:
-          lastError = e.msg
-          continue
+          raise e
         except TransportError:
           nil
 
