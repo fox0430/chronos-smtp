@@ -283,7 +283,10 @@ proc dial*(
   helo: bool = true): Future[Smtp] {.async.} =
 
     result = newSmtp(useTls)
-    await result.connect(host, port, flags, helo)
+    try:
+      await result.connect(host, port, flags, helo)
+    except CancelledError as e:
+      raise e
 
 proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   ## Put the SMTP connection in TLS (Transport Layer Security) mode.
