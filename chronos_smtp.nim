@@ -361,9 +361,11 @@ proc sendMail*(
     await smtp.send(".\c\L")
     await smtp.checkReply("250")
 
-proc close*(smtp: Smtp) {.async.} =
+proc close*(smtp: Smtp, quit: bool = true) {.async.} =
   ## Disconnects from the SMTP server and closes the stream.
-  await smtp.send(quitComand())
+
+  if quit:
+    await smtp.send(quitComand())
 
   var futs: seq[Future[void]]
   if not smtp.reader.isNil and not smtp.reader.closed:
