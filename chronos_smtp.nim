@@ -177,10 +177,17 @@ proc newSmtp*(useTls: bool = false): Smtp =
   else:
     return Smtp(kind: SmtpClientScheme.NonSecure)
 
-proc checkReply*(smtp: Smtp, reply: string) {.async.} =
-  let line = await smtp.read
-  if not line.startsWith(reply):
-    await quitExcpt(smtp, "Expected " & reply & " reply, got: " & line)
+proc checkReply*(
+  smtp: Smtp,
+  reply: string,
+  closeWhenFailed: bool = true) {.async.} =
+    let line = await smtp.read
+    if not line.startsWith(reply):
+      let msg = "Expected " & reply & " reply, got: " & line
+      if closeWhenFailed:
+        await quitExcpt(smtp, msg)
+      else:
+        raise newException(ReplyError, msg)
 
 proc helo*(smtp: Smtp) {.async.} =
   await smtp.send(heloCommand(smtp.host))
@@ -209,7 +216,8 @@ proc connect*(
   host: string,
   port: Port,
   flags: set[TLSFlags] = {},
-  helo: bool = true) {.async.} =
+  helo: bool = true,
+  closeWhenFailed: bool = true) {.async.} =
     ## Establishes a connection with a SMTP server.
 
     let addresses = resolveTAddress(host, port)
@@ -255,7 +263,7 @@ proc connect*(
           smtp.writer = tls.writer
           smtp.tls = tls
 
-        await smtp.checkReply("220")
+        await smtp.checkReply("220", closeWhenFailed)
 
         if helo:
           let speaksEsmtp = await smtp.ehlo
@@ -279,11 +287,12 @@ proc dial*(
   port: Port,
   useTls: bool = false,
   flags: set[TLSFlags] = {},
-  helo: bool = true): Future[Smtp] {.async.} =
+  helo: bool = true,
+  closeWhenFailed: bool = true): Future[Smtp] {.async.} =
 
     result = newSmtp(useTls)
     try:
-      await result.connect(host, port, flags, helo)
+      await result.connect(host, port, flags, helo, closeWhenFailed)
     except CancelledError as e:
       raise e
 
