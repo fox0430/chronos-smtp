@@ -180,11 +180,11 @@ proc newSmtp*(useTls: bool = false): Smtp =
 proc checkReply*(
   smtp: Smtp,
   reply: string,
-  close: bool = true) {.async.} =
+  closeWhenFailed: bool = true) {.async.} =
     let line = await smtp.read
     if not line.startsWith(reply):
       let msg = "Expected " & reply & " reply, got: " & line
-      if close:
+      if closeWhenFailed:
         await quitExcpt(smtp, msg)
       else:
         raise newException(ReplyError, msg)
