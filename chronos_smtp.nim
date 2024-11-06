@@ -180,11 +180,11 @@ proc newSmtp*(useTls: bool = false): Smtp =
 proc checkReply*(
   smtp: Smtp,
   reply: string,
-  closeWhenFailed: bool = true) {.async.} =
+  quitWhenFailed: bool = true) {.async.} =
     let line = await smtp.read
     if not line.startsWith(reply):
       let msg = "Expected " & reply & " reply, got: " & line
-      if closeWhenFailed:
+      if quitWhenFailed:
         await quitExcpt(smtp, msg)
       else:
         raise newException(ReplyError, msg)
@@ -217,7 +217,7 @@ proc connect*(
   port: Port,
   flags: set[TLSFlags] = {},
   helo: bool = true,
-  closeWhenFailed: bool = true) {.async.} =
+  quitWhenFailed: bool = true) {.async.} =
     ## Establishes a connection with a SMTP server.
 
     let addresses = resolveTAddress(host, port)
@@ -263,7 +263,7 @@ proc connect*(
           smtp.writer = tls.writer
           smtp.tls = tls
 
-        await smtp.checkReply("220", closeWhenFailed)
+        await smtp.checkReply("220", quitWhenFailed)
 
         if helo:
           let speaksEsmtp = await smtp.ehlo
@@ -288,11 +288,11 @@ proc dial*(
   useTls: bool = false,
   flags: set[TLSFlags] = {},
   helo: bool = true,
-  closeWhenFailed: bool = true): Future[Smtp] {.async.} =
+  quitWhenFailed: bool = true): Future[Smtp] {.async.} =
 
     result = newSmtp(useTls)
     try:
-      await result.connect(host, port, flags, helo, closeWhenFailed)
+      await result.connect(host, port, flags, helo, quitWhenFailed)
     except CancelledError as e:
       raise e
 
