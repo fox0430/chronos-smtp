@@ -96,7 +96,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">checkReply
-  <li><a class="reference" href="#checkReply%2CSmtp%2Cstring%2Cbool" title="checkReply(smtp: Smtp; reply: string; closeWhenFailed: bool = true): Future[void]">checkReply(smtp: Smtp; reply: string; closeWhenFailed: bool = true): Future[void]</a></li>
+  <li><a class="reference" href="#checkReply%2CSmtp%2Cstring%2Cbool" title="checkReply(smtp: Smtp; reply: string; quitWhenFailed: bool = true): Future[void]">checkReply(smtp: Smtp; reply: string; quitWhenFailed: bool = true): Future[void]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">close
@@ -105,8 +105,8 @@
 </ul>
 <ul class="simple nested-toc-section">connect
   <li><a class="reference" href="#connect%2CSmtp%2Cstring%2CPort%2Cset%5BTLSFlags%5D%2Cbool%2Cbool" title="connect(smtp: Smtp; host: string; port: Port; flags: set[TLSFlags] = {};
-        helo: bool = true; closeWhenFailed: bool = true): Future[void]">connect(smtp: Smtp; host: string; port: Port; flags: set[TLSFlags] = {};
-        helo: bool = true; closeWhenFailed: bool = true): Future[void]</a></li>
+        helo: bool = true; quitWhenFailed: bool = true): Future[void]">connect(smtp: Smtp; host: string; port: Port; flags: set[TLSFlags] = {};
+        helo: bool = true; quitWhenFailed: bool = true): Future[void]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">createMessage
@@ -124,8 +124,8 @@
 </ul>
 <ul class="simple nested-toc-section">dial
   <li><a class="reference" href="#dial%2Cstring%2CPort%2Cbool%2Cset%5BTLSFlags%5D%2Cbool%2Cbool" title="dial(host: string; port: Port; useTls: bool = false; flags: set[TLSFlags] = {};
-     helo: bool = true; closeWhenFailed: bool = true): Future[Smtp]">dial(host: string; port: Port; useTls: bool = false; flags: set[TLSFlags] = {};
-     helo: bool = true; closeWhenFailed: bool = true): Future[Smtp]</a></li>
+     helo: bool = true; quitWhenFailed: bool = true): Future[Smtp]">dial(host: string; port: Port; useTls: bool = false; flags: set[TLSFlags] = {};
+     helo: bool = true; quitWhenFailed: bool = true): Future[Smtp]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">ehlo
@@ -327,7 +327,7 @@
 </div>
 <div id="checkReply-procs-all">
   <div id="checkReply,Smtp,string,bool">
-  <dt><pre><span class="Keyword">proc</span> <a href="#checkReply%2CSmtp%2Cstring%2Cbool"><span class="Identifier">checkReply</span></a><span class="Other">(</span><span class="Identifier">smtp</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">;</span> <span class="Identifier">reply</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">closeWhenFailed</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#checkReply%2CSmtp%2Cstring%2Cbool"><span class="Identifier">checkReply</span></a><span class="Other">(</span><span class="Identifier">smtp</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">;</span> <span class="Identifier">reply</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">quitWhenFailed</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span>
     <span class="Identifier">void</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span>
             <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -353,7 +353,7 @@
 <div id="connect-procs-all">
   <div id="connect,Smtp,string,Port,set[TLSFlags],bool,bool">
   <dt><pre><span class="Keyword">proc</span> <a href="#connect%2CSmtp%2Cstring%2CPort%2Cset%5BTLSFlags%5D%2Cbool%2Cbool"><span class="Identifier">connect</span></a><span class="Other">(</span><span class="Identifier">smtp</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">;</span> <span class="Identifier">host</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <span class="Identifier">Port</span><span class="Other">;</span> <span class="Identifier">flags</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><span class="Identifier">TLSFlags</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">;</span>
-             <span class="Identifier">helo</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span> <span class="Identifier">closeWhenFailed</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span> {.
+             <span class="Identifier">helo</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span> <span class="Identifier">quitWhenFailed</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -405,7 +405,7 @@
   <div id="dial,string,Port,bool,set[TLSFlags],bool,bool">
   <dt><pre><span class="Keyword">proc</span> <a href="#dial%2Cstring%2CPort%2Cbool%2Cset%5BTLSFlags%5D%2Cbool%2Cbool"><span class="Identifier">dial</span></a><span class="Other">(</span><span class="Identifier">host</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <span class="Identifier">Port</span><span class="Other">;</span> <span class="Identifier">useTls</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
           <span class="Identifier">flags</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><span class="Identifier">TLSFlags</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">;</span> <span class="Identifier">helo</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span>
-          <span class="Identifier">closeWhenFailed</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+          <span class="Identifier">quitWhenFailed</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -675,7 +675,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2024-11-05 18:37:51 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-11-06 15:25:45 UTC</small>
       </div>
     </div>
   </div>
