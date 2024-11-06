@@ -25,8 +25,15 @@ jobs:
         path: ~/.choosenim
         key: ${{ runner.os }}-choosenim-${{ env.NIM_VERSION }}
 
-    - uses: jiro4989/setup-nim-action@v1
-    - run: nimble doc chronos_smtp -y
+    - name: Setup Nim
+      uses: jiro4989/setup-nim-action@v2
+      with:
+        nim-version: 'stable'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Gen docs
+      run: nimble doc chronos_smtp -y
+
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v4
       with:
