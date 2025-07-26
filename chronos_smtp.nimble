@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.5.1"
+version       = "0.6.0"
 author        = "fox0430"
 description   = "SMTP client implementation using chronos"
 license       = "MIT"
