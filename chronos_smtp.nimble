@@ -9,6 +9,6 @@ bin           = @["chronos_smtp"]
 
 # Dependencies
 
-requires "nim >= 1.6.16",
+requires "nim >= 2.0.16",
          "chronos >= 4.0.0",
          "chronicles >= 0.10.3"
