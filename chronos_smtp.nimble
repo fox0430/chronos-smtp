@@ -11,4 +11,4 @@ bin           = @["chronos_smtp"]
 
 requires "nim >= 2.0.16",
          "chronos >= 4.0.0",
-         "chronicles >= 0.12.0"
+         "chronicles >= 0.10.3"
