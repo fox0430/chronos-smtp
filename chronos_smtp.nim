@@ -110,7 +110,7 @@ proc read*(smtp: Smtp): Future[string] {.async.} =
     posi = result.len + 4
     result.add '\n' & line
 
-  smtp.logs.add "Server: {result}"
+  smtp.logs.add fmt"Server: {result}"
   debug "Server:", result
 
 proc readLine*(smtp: Smtp): Future[string] {.async.} =
