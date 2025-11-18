@@ -19,6 +19,8 @@ suite "sendMail":
 
     waitFor conn.close
 
+    check conn.logs.len > 0
+
     check conn.closed
 
   test "Basic 2":
@@ -33,5 +35,7 @@ suite "sendMail":
     check not conn.closed
 
     waitFor conn.close
+
+    check conn.logs.len > 0
 
     check conn.closed

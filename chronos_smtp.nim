@@ -4,7 +4,7 @@
 # Copyright (c) 2012 Dominik Picheta
 # https://github.com/nim-lang/smtp/blob/master/LICENSE
 
-import std/[base64, strtabs, strutils]
+import std/[base64, strtabs, strutils, strformat]
 
 import
   pkg/chronos,
@@ -45,6 +45,7 @@ type
     writer*: AsyncStreamWriter
     host*: string
     port*: Port
+    logs*: seq[string]
 
 proc heloCommand*(param: string): string {.inline.} =
   "HELO " & param & "\c\L"
@@ -94,7 +95,9 @@ proc containsNewline(xs: seq[string]): bool =
       return true
 
 proc send*(smtp: Smtp, cmd: string) {.async.} =
+  smtp.logs.add fmt"Client: {cmd}"
   debug "Client:", cmd
+
   await smtp.writer.write(cmd)
 
 proc read*(smtp: Smtp): Future[string] {.async.} =
@@ -107,10 +110,13 @@ proc read*(smtp: Smtp): Future[string] {.async.} =
     posi = result.len + 4
     result.add '\n' & line
 
+  smtp.logs.add "Server: {result}"
   debug "Server:", result
 
 proc readLine*(smtp: Smtp): Future[string] {.async.} =
   result = await smtp.reader.readLine
+
+  smtp.logs.add fmt"Server: {result}"
   debug "Server:", result
 
 proc quitExcpt(smtp: Smtp, msg: string) {.async.} =
