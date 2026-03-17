@@ -101,13 +101,13 @@ proc send*(smtp: Smtp, cmd: string) {.async.} =
   await smtp.writer.write(cmd)
 
 proc read*(smtp: Smtp): Future[string] {.async.} =
-  ## Return all lines
+  ## Return all lines of a (possibly multiline) SMTP response.
+  ## Multiline responses use "xxx-" for continuation and "xxx " for the final line.
 
-  result.add await smtp.reader.readLine
-  var posi = 3
-  while result.len > posi and result[posi] == '-':
-    let line = await smtp.reader.readLine
-    posi = result.len + 4
+  var line = await smtp.reader.readLine
+  result.add line
+  while line.len > 3 and line[3] == '-':
+    line = await smtp.reader.readLine
     result.add '\n' & line
 
   smtp.logs.add fmt"Server: {result}"
