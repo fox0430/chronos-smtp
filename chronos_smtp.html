@@ -72,6 +72,7 @@
   writer*: AsyncStreamWriter
   host*: string
   port*: Port
+  timeout*: Duration
   logs*: seq[string]">Smtp</a></li>
 <li><a class="reference" href="#SmtpClientScheme" title="SmtpClientScheme {.pure.} = enum
   NonSecure, Secure">SmtpClientScheme</a></li>
@@ -125,8 +126,10 @@
 </ul>
 <ul class="simple nested-toc-section">dial
   <li><a class="reference" href="#dial%2Cstring%2CPort%2Cbool%2Cset%5BTLSFlags%5D%2Cbool%2Cbool" title="dial(host: string; port: Port; useTls: bool = false; flags: set[TLSFlags] = {};
-     helo: bool = true; quitWhenFailed: bool = true): Future[Smtp]">dial(host: string; port: Port; useTls: bool = false; flags: set[TLSFlags] = {};
-     helo: bool = true; quitWhenFailed: bool = true): Future[Smtp]</a></li>
+     helo: bool = true; quitWhenFailed: bool = true; timeout = InfiniteDuration): Future[
+    Smtp]">dial(host: string; port: Port; useTls: bool = false; flags: set[TLSFlags] = {};
+     helo: bool = true; quitWhenFailed: bool = true; timeout = InfiniteDuration): Future[
+    Smtp]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">ehlo
@@ -166,7 +169,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">newSmtp
-  <li><a class="reference" href="#newSmtp%2Cbool" title="newSmtp(useTls: bool = false): Smtp">newSmtp(useTls: bool = false): Smtp</a></li>
+  <li><a class="reference" href="#newSmtp%2Cbool" title="newSmtp(useTls: bool = false; timeout = InfiniteDuration): Smtp">newSmtp(useTls: bool = false; timeout = InfiniteDuration): Smtp</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">noopCommand
@@ -263,6 +266,7 @@
   <span class="Identifier">writer</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">AsyncStreamWriter</span>
   <span class="Identifier">host</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
   <span class="Identifier">port</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Port</span>
+  <span class="Identifier">timeout</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Duration</span>
   <span class="Identifier">logs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span></pre></dt>
   <dd>
     
@@ -407,8 +411,8 @@
   <div id="dial,string,Port,bool,set[TLSFlags],bool,bool">
   <dt><pre><span class="Keyword">proc</span> <a href="#dial%2Cstring%2CPort%2Cbool%2Cset%5BTLSFlags%5D%2Cbool%2Cbool"><span class="Identifier">dial</span></a><span class="Other">(</span><span class="Identifier">host</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <span class="Identifier">Port</span><span class="Other">;</span> <span class="Identifier">useTls</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
           <span class="Identifier">flags</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><span class="Identifier">TLSFlags</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">;</span> <span class="Identifier">helo</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span>
-          <span class="Identifier">quitWhenFailed</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+          <span class="Identifier">quitWhenFailed</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Identifier">InfiniteDuration</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -527,7 +531,8 @@
 </div>
 <div id="newSmtp-procs-all">
   <div id="newSmtp,bool">
-  <dt><pre><span class="Keyword">proc</span> <a href="#newSmtp%2Cbool"><span class="Identifier">newSmtp</span></a><span class="Other">(</span><span class="Identifier">useTls</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#newSmtp%2Cbool"><span class="Identifier">newSmtp</span></a><span class="Other">(</span><span class="Identifier">useTls</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Identifier">InfiniteDuration</span><span class="Other">)</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -677,7 +682,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-03-17 11:03:20 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-03-17 11:48:42 UTC</small>
       </div>
     </div>
   </div>
