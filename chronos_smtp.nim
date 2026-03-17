@@ -124,43 +124,51 @@ proc quitExcpt(smtp: Smtp, msg: string) {.async.} =
   raise newException(ReplyError, msg)
 
 proc createMessage*(
-  mSubject, mBody: string,
-  mTo, mCc: seq[string],
-  otherHeaders: openArray[tuple[name, value: string]]): Message =
-    ## Creates a new MIME compliant message.
-    ##
-    ## You need to make sure that `mSubject`, `mTo` and `mCc` don't contain
-    ## any newline characters. Failing to do so will raise `AssertionDefect`.
-    doAssert(not mSubject.contains({'\c', '\L'}),
-             "'mSubject' shouldn't contain any newline characters")
-    doAssert(not (mTo.containsNewline() or mCc.containsNewline()),
-             "'mTo' and 'mCc' shouldn't contain any newline characters")
+    mSubject, mBody: string,
+    mTo, mCc: seq[string],
+    otherHeaders: openArray[tuple[name, value: string]],
+): Message =
+  ## Creates a new MIME compliant message.
+  ##
+  ## You need to make sure that `mSubject`, `mTo` and `mCc` don't contain
+  ## any newline characters. Failing to do so will raise `AssertionDefect`.
+  doAssert(
+    not mSubject.contains({'\c', '\L'}),
+    "'mSubject' shouldn't contain any newline characters",
+  )
+  doAssert(
+    not (mTo.containsNewline() or mCc.containsNewline()),
+    "'mTo' and 'mCc' shouldn't contain any newline characters",
+  )
 
-    result.msgTo = mTo
-    result.msgCc = mCc
-    result.msgSubject = mSubject
-    result.msgBody = mBody
-    result.msgOtherHeaders = newStringTable()
-    for n, v in items(otherHeaders):
-      result.msgOtherHeaders[n] = v
+  result.msgTo = mTo
+  result.msgCc = mCc
+  result.msgSubject = mSubject
+  result.msgBody = mBody
+  result.msgOtherHeaders = newStringTable()
+  for n, v in items(otherHeaders):
+    result.msgOtherHeaders[n] = v
 
 proc createMessage*(
-  mSubject, mBody: string,
-  mTo: seq[string] = @[],
-  mCc: seq[string] = @[]): Message =
-    ## Alternate version of the above.
-    ##
-    ## You need to make sure that `mSubject`, `mTo` and `mCc` don't contain
-    ## any newline characters. Failing to do so will raise `AssertionDefect`.
-    doAssert(not mSubject.contains({'\c', '\L'}),
-             "'mSubject' shouldn't contain any newline characters")
-    doAssert(not (mTo.containsNewline() or mCc.containsNewline()),
-             "'mTo' and 'mCc' shouldn't contain any newline characters")
-    result.msgTo = mTo
-    result.msgCc = mCc
-    result.msgSubject = mSubject
-    result.msgBody = mBody
-    result.msgOtherHeaders = newStringTable()
+    mSubject, mBody: string, mTo: seq[string] = @[], mCc: seq[string] = @[]
+): Message =
+  ## Alternate version of the above.
+  ##
+  ## You need to make sure that `mSubject`, `mTo` and `mCc` don't contain
+  ## any newline characters. Failing to do so will raise `AssertionDefect`.
+  doAssert(
+    not mSubject.contains({'\c', '\L'}),
+    "'mSubject' shouldn't contain any newline characters",
+  )
+  doAssert(
+    not (mTo.containsNewline() or mCc.containsNewline()),
+    "'mTo' and 'mCc' shouldn't contain any newline characters",
+  )
+  result.msgTo = mTo
+  result.msgCc = mCc
+  result.msgSubject = mSubject
+  result.msgBody = mBody
+  result.msgOtherHeaders = newStringTable()
 
 proc `$`*(msg: Message): string =
   ## stringify for `Message`.
@@ -183,17 +191,14 @@ proc newSmtp*(useTls: bool = false): Smtp =
   else:
     return Smtp(kind: SmtpClientScheme.NonSecure)
 
-proc checkReply*(
-  smtp: Smtp,
-  reply: string,
-  quitWhenFailed: bool = true) {.async.} =
-    let line = await smtp.read
-    if not line.startsWith(reply):
-      let msg = "Expected " & reply & " reply, got: " & line
-      if quitWhenFailed:
-        await quitExcpt(smtp, msg)
-      else:
-        raise newException(ReplyError, msg)
+proc checkReply*(smtp: Smtp, reply: string, quitWhenFailed: bool = true) {.async.} =
+  let line = await smtp.read
+  if not line.startsWith(reply):
+    let msg = "Expected " & reply & " reply, got: " & line
+    if quitWhenFailed:
+      await quitExcpt(smtp, msg)
+    else:
+      raise newException(ReplyError, msg)
 
 proc helo*(smtp: Smtp) {.async.} =
   await smtp.send(heloCommand(smtp.host))
@@ -208,9 +213,12 @@ proc readEhlo(smtp: Smtp): Future[bool] {.async.} =
   ## Return `true` if server supports `EHLO`, false otherwise.
   while true:
     var line = await smtp.readLine
-    if line.startsWith("250-"): continue
-    elif line.startsWith("250 "): return true # last line
-    else: return false
+    if line.startsWith("250-"):
+      continue
+    elif line.startsWith("250 "):
+      return true # last line
+    else:
+      return false
 
 proc ehlo*(smtp: Smtp): Future[bool] {.async.} =
   ## Sends EHLO request.
@@ -218,89 +226,83 @@ proc ehlo*(smtp: Smtp): Future[bool] {.async.} =
   return await smtp.readEhlo
 
 proc connect*(
-  smtp: Smtp,
-  host: string,
-  port: Port,
-  flags: set[TLSFlags] = {},
-  helo: bool = true,
-  quitWhenFailed: bool = true) {.async.} =
-    ## Establishes a connection with a SMTP server.
+    smtp: Smtp,
+    host: string,
+    port: Port,
+    flags: set[TLSFlags] = {},
+    helo: bool = true,
+    quitWhenFailed: bool = true,
+) {.async.} =
+  ## Establishes a connection with a SMTP server.
 
-    let addresses = resolveTAddress(host, port)
-    var lastError = ""
-    for a in addresses:
-      let transp =
-        try:
-          await connect(a)
-        except CancelledError as e:
-          raise e
-        except TransportError:
-          nil
+  let addresses = resolveTAddress(host, port)
+  var lastError = ""
+  for a in addresses:
+    let transp =
+      try:
+        await connect(a)
+      except CancelledError as e:
+        raise e
+      except TransportError:
+        nil
 
-      if not transp.isNil:
+    if not transp.isNil:
+      smtp.transp = transp
+      smtp.host = host
+      smtp.port = port
+
+      case smtp.kind
+      of SmtpClientScheme.NonSecure:
+        smtp.reader = newAsyncStreamReader(smtp.transp)
+        smtp.writer = newAsyncStreamWriter(smtp.transp)
+      of SmtpClientScheme.Secure:
+        let
+          treader = newAsyncStreamReader(smtp.transp)
+          twriter = newAsyncStreamWriter(smtp.transp)
+
+          tls =
+            try:
+              newTLSClientAsyncStream(treader, twriter, host, flags = flags)
+            except TLSStreamInitError as e:
+              lastError = e.msg
+              continue
+
         smtp.transp = transp
-        smtp.host = host
-        smtp.port = port
+        smtp.treader = treader
+        smtp.twriter = twriter
+        smtp.reader = tls.reader
+        smtp.writer = tls.writer
+        smtp.tls = tls
 
-        case smtp.kind:
-        of SmtpClientScheme.NonSecure:
-          smtp.reader = newAsyncStreamReader(smtp.transp)
-          smtp.writer = newAsyncStreamWriter(smtp.transp)
-        of SmtpClientScheme.Secure:
-          let
-            treader = newAsyncStreamReader(smtp.transp)
-            twriter = newAsyncStreamWriter(smtp.transp)
+      await smtp.checkReply("220", quitWhenFailed)
 
-            tls =
-              try:
-                newTLSClientAsyncStream(
-                  treader,
-                  twriter,
-                  host,
-                  flags = flags)
-              except TLSStreamInitError as e:
-                lastError = e.msg
-                continue
+      if helo:
+        let speaksEsmtp = await smtp.ehlo
+        if not speaksEsmtp:
+          await smtp.helo
 
-          smtp.transp = transp
-          smtp.treader = treader
-          smtp.twriter = twriter
-          smtp.reader = tls.reader
-          smtp.writer = tls.writer
-          smtp.tls = tls
+      return
 
-        await smtp.checkReply("220", quitWhenFailed)
-
-        if helo:
-          let speaksEsmtp = await smtp.ehlo
-          if not speaksEsmtp:
-            await smtp.helo
-
-        return
-
-    # If all attempts to connect to the remote host have failed.
-    if lastError.len > 0:
-      raise newException(
-        SmtpError,
-        "Could not connect to remote host, reason: " & lastError)
-    else:
-      raise newException(
-        SmtpError,
-        "Could not connect to remote host")
+  # If all attempts to connect to the remote host have failed.
+  if lastError.len > 0:
+    raise
+      newException(SmtpError, "Could not connect to remote host, reason: " & lastError)
+  else:
+    raise newException(SmtpError, "Could not connect to remote host")
 
 proc dial*(
-  host: string,
-  port: Port,
-  useTls: bool = false,
-  flags: set[TLSFlags] = {},
-  helo: bool = true,
-  quitWhenFailed: bool = true): Future[Smtp] {.async.} =
-
-    result = newSmtp(useTls)
-    try:
-      await result.connect(host, port, flags, helo, quitWhenFailed)
-    except CancelledError as e:
-      raise e
+    host: string,
+    port: Port,
+    useTls: bool = false,
+    flags: set[TLSFlags] = {},
+    helo: bool = true,
+    quitWhenFailed: bool = true,
+): Future[Smtp] {.async.} =
+  result = newSmtp(useTls)
+  try:
+    await result.connect(host, port, flags, helo, quitWhenFailed)
+  except CancelledError as e:
+    raise e
 
 proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   ## Put the SMTP connection in TLS (Transport Layer Security) mode.
@@ -311,11 +313,7 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   let
     treader = newAsyncStreamReader(smtp.transp)
     twriter = newAsyncStreamWriter(smtp.transp)
-    tls = newTLSClientAsyncStream(
-      treader,
-      twriter,
-      smtp.host,
-      flags = flags)
+    tls = newTLSClientAsyncStream(treader, twriter, smtp.host, flags = flags)
 
   # Upgrade to TLS stream
   var newSmtp = Smtp(
@@ -328,7 +326,8 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
     writer: tls.writer,
     flags: flags,
     host: smtp.host,
-    port: smtp.port)
+    port: smtp.port,
+  )
   smtp[] = newSmtp[]
 
   let speaksEsmtp = await smtp.ehlo
@@ -341,8 +340,9 @@ proc auth*(smtp: Smtp, username, password: string) {.async.} =
   ## May fail with ReplyError.
 
   await smtp.send(authCommand())
-  await smtp.checkReply("334") # TODO: Check whether it's asking for the "Username:"
-                               # i.e "334 VXNlcm5hbWU6"
+  await smtp.checkReply("334")
+    # TODO: Check whether it's asking for the "Username:"
+    # i.e "334 VXNlcm5hbWU6"
   await smtp.send(encode(username) & "\c\L")
   await smtp.checkReply("334") # TODO: Same as above, only "Password:" (I think?)
 
@@ -350,31 +350,31 @@ proc auth*(smtp: Smtp, username, password: string) {.async.} =
   await smtp.checkReply("235") # Check whether the authentication was successful.
 
 proc sendMail*(
-  smtp: Smtp,
-  fromAddr: string,
-  toAddrs: seq[string],
-  msg: string) {.async.} =
-    ## Sends `msg` from `fromAddr` to the addresses specified in `toAddrs`.
-    ## Messages may be formed using `createMessage` by converting the
-    ## Message into a string.
-    ##
-    ## You need to make sure that `fromAddr` and `toAddrs` don't contain
-    ## any newline characters. Failing to do so will raise `AssertionDefect`.
-    doAssert(not (toAddrs.containsNewline() or fromAddr.contains({'\c', '\L'})),
-             "'toAddrs' and 'fromAddr' shouldn't contain any newline characters")
+    smtp: Smtp, fromAddr: string, toAddrs: seq[string], msg: string
+) {.async.} =
+  ## Sends `msg` from `fromAddr` to the addresses specified in `toAddrs`.
+  ## Messages may be formed using `createMessage` by converting the
+  ## Message into a string.
+  ##
+  ## You need to make sure that `fromAddr` and `toAddrs` don't contain
+  ## any newline characters. Failing to do so will raise `AssertionDefect`.
+  doAssert(
+    not (toAddrs.containsNewline() or fromAddr.contains({'\c', '\L'})),
+    "'toAddrs' and 'fromAddr' shouldn't contain any newline characters",
+  )
 
-    await smtp.send(mailCommand(fromAddr))
+  await smtp.send(mailCommand(fromAddr))
+  await smtp.checkReply("250")
+  for address in items(toAddrs):
+    await smtp.send(rcptCommand(address))
     await smtp.checkReply("250")
-    for address in items(toAddrs):
-      await smtp.send(rcptCommand(address))
-      await smtp.checkReply("250")
 
-    # Send the message
-    await smtp.send(dataCommand())
-    await smtp.checkReply("354")
-    await smtp.send(msg & "\c\L")
-    await smtp.send(".\c\L")
-    await smtp.checkReply("250")
+  # Send the message
+  await smtp.send(dataCommand())
+  await smtp.checkReply("354")
+  await smtp.send(msg & "\c\L")
+  await smtp.send(".\c\L")
+  await smtp.checkReply("250")
 
 proc close*(smtp: Smtp, quit: bool = true) {.async.} =
   ## Disconnects from the SMTP server and closes the stream.
@@ -394,6 +394,7 @@ proc close*(smtp: Smtp, quit: bool = true) {.async.} =
       futs.add smtp.twriter.closeWait
   futs.add smtp.transp.closeWait
 
-  if futs.len > 0: await noCancel(allFutures(futs))
+  if futs.len > 0:
+    await noCancel(allFutures(futs))
 
   smtp.closed = true

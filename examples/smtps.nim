@@ -6,9 +6,8 @@ proc main() {.async.} =
   await conn.auth("username", "password")
 
   let msg = createMessage(
-    "Hello from Nim's SMTP",
-    "Hello!.\n Is this awesome or what?",
-    @["foo@gmail.com"])
+    "Hello from Nim's SMTP", "Hello!.\n Is this awesome or what?", @["foo@gmail.com"]
+  )
   await conn.sendmail("username@gmail.com", @["foo@gmail.com"], $msg)
 
   await conn.close
