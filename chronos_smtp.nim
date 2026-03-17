@@ -68,7 +68,7 @@ proc rcptCommand*(param: string): string {.inline.} =
 proc dataCommand*(): string {.inline.} =
   "DATA\c\L"
 
-proc quitComand*(): string {.inline.} =
+proc quitCommand*(): string {.inline.} =
   "QUIT\c\L"
 
 proc noopCommand*(): string {.inline.} =
@@ -120,7 +120,7 @@ proc readLine*(smtp: Smtp): Future[string] {.async.} =
   debug "Server:", result
 
 proc quitExcpt(smtp: Smtp, msg: string) {.async.} =
-  await smtp.send(quitComand())
+  await smtp.send(quitCommand())
   raise newException(ReplyError, msg)
 
 proc createMessage*(
@@ -380,7 +380,7 @@ proc close*(smtp: Smtp, quit: bool = true) {.async.} =
   ## Disconnects from the SMTP server and closes the stream.
 
   if quit:
-    await smtp.send(quitComand())
+    await smtp.send(quitCommand())
 
   var futs: seq[Future[void]]
   if not smtp.reader.isNil and not smtp.reader.closed:
