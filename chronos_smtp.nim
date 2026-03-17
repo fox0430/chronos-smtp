@@ -13,7 +13,7 @@ import
   pkg/chronos/transports/stream,
   pkg/chronicles
 
-export chronos, Port, TLSFlags
+export chronos, Port, TLSFlags, Duration, AsyncTimeoutError
 
 type
   SmtpClientScheme* {.pure.} = enum
@@ -45,6 +45,7 @@ type
     writer*: AsyncStreamWriter
     host*: string
     port*: Port
+    timeout*: Duration
     logs*: seq[string]
 
 proc heloCommand*(param: string): string {.inline.} =
@@ -98,23 +99,23 @@ proc send*(smtp: Smtp, cmd: string) {.async.} =
   smtp.logs.add fmt"Client: {cmd}"
   debug "Client:", cmd
 
-  await smtp.writer.write(cmd)
+  await smtp.writer.write(cmd).wait(smtp.timeout)
 
 proc read*(smtp: Smtp): Future[string] {.async.} =
   ## Return all lines of a (possibly multiline) SMTP response.
   ## Multiline responses use "xxx-" for continuation and "xxx " for the final line.
 
-  var line = await smtp.reader.readLine
+  var line = await smtp.reader.readLine().wait(smtp.timeout)
   result.add line
   while line.len > 3 and line[3] == '-':
-    line = await smtp.reader.readLine
+    line = await smtp.reader.readLine().wait(smtp.timeout)
     result.add '\n' & line
 
   smtp.logs.add fmt"Server: {result}"
   debug "Server:", result
 
 proc readLine*(smtp: Smtp): Future[string] {.async.} =
-  result = await smtp.reader.readLine
+  result = await smtp.reader.readLine().wait(smtp.timeout)
 
   smtp.logs.add fmt"Server: {result}"
   debug "Server:", result
@@ -185,11 +186,11 @@ proc `$`*(msg: Message): string =
   result.add("\c\L")
   result.add(msg.msgBody)
 
-proc newSmtp*(useTls: bool = false): Smtp =
+proc newSmtp*(useTls: bool = false, timeout = InfiniteDuration): Smtp =
   if useTls:
-    return Smtp(kind: SmtpClientScheme.Secure)
+    return Smtp(kind: SmtpClientScheme.Secure, timeout: timeout)
   else:
-    return Smtp(kind: SmtpClientScheme.NonSecure)
+    return Smtp(kind: SmtpClientScheme.NonSecure, timeout: timeout)
 
 proc checkReply*(smtp: Smtp, reply: string, quitWhenFailed: bool = true) {.async.} =
   let line = await smtp.read
@@ -240,8 +241,10 @@ proc connect*(
   for a in addresses:
     let transp =
       try:
-        await connect(a)
+        await connect(a).wait(smtp.timeout)
       except CancelledError as e:
+        raise e
+      except AsyncTimeoutError as e:
         raise e
       except TransportError:
         nil
@@ -297,12 +300,30 @@ proc dial*(
     flags: set[TLSFlags] = {},
     helo: bool = true,
     quitWhenFailed: bool = true,
+    timeout = InfiniteDuration,
 ): Future[Smtp] {.async.} =
-  result = newSmtp(useTls)
+  let smtp = newSmtp(useTls, timeout)
   try:
-    await result.connect(host, port, flags, helo, quitWhenFailed)
+    await smtp.connect(host, port, flags, helo, quitWhenFailed)
   except CancelledError as e:
     raise e
+  except CatchableError as e:
+    var futs: seq[Future[void]]
+    if not smtp.reader.isNil and not smtp.reader.closed:
+      futs.add smtp.reader.closeWait
+    if not smtp.writer.isNil and not smtp.writer.closed:
+      futs.add smtp.writer.closeWait
+    if smtp.kind == SmtpClientScheme.Secure:
+      if not smtp.treader.isNil and not smtp.treader.closed:
+        futs.add smtp.treader.closeWait
+      if not smtp.twriter.isNil and not smtp.twriter.closed:
+        futs.add smtp.twriter.closeWait
+    if not smtp.transp.isNil:
+      futs.add smtp.transp.closeWait
+    if futs.len > 0:
+      await noCancel(allFutures(futs))
+    raise e
+  return smtp
 
 proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   ## Put the SMTP connection in TLS (Transport Layer Security) mode.
@@ -336,6 +357,7 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
     flags: flags,
     host: smtp.host,
     port: smtp.port,
+    timeout: smtp.timeout,
     logs: smtp.logs,
   )
   smtp[] = newSmtp[]
@@ -396,7 +418,12 @@ proc close*(smtp: Smtp, quit: bool = true) {.async.} =
   ## Disconnects from the SMTP server and closes the stream.
 
   if quit:
-    await smtp.send(quitCommand())
+    try:
+      await smtp.send(quitCommand())
+    except CancelledError as e:
+      raise e
+    except CatchableError:
+      discard
 
   var futs: seq[Future[void]]
   if not smtp.reader.isNil and not smtp.reader.closed:

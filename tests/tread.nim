@@ -26,7 +26,7 @@ proc servOnce(payload: string): Future[Port] {.async.} =
 
 # Helper: connect an Smtp object (NonSecure, no EHLO handshake) to addr.
 proc connectRaw(port: Port): Future[Smtp] {.async.} =
-  let smtp = Smtp(kind: SmtpClientScheme.NonSecure)
+  let smtp = Smtp(kind: SmtpClientScheme.NonSecure, timeout: InfiniteDuration)
   let transp = await connect(initTAddress("127.0.0.1", port))
   smtp.transp = transp
   smtp.reader = newAsyncStreamReader(transp)
