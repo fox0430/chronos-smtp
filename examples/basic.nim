@@ -5,9 +5,8 @@ proc main() {.async.} =
   await conn.connect("localhost", 2525.Port)
 
   let msg = createMessage(
-    "Hello from Nim's SMTP",
-    "Hello!.\n Is this awesome or what?",
-    @["foo@exmaple.com"])
+    "Hello from Nim's SMTP", "Hello!.\n Is this awesome or what?", @["foo@exmaple.com"]
+  )
   await conn.sendmail("username@exmaple.com", @["foo@exmaple.com"], $msg)
 
   await conn.close
