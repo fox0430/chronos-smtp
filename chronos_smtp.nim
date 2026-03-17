@@ -382,7 +382,13 @@ proc sendMail*(
   # Send the message
   await smtp.send(dataCommand())
   await smtp.checkReply("354")
-  await smtp.send(msg & "\c\L")
+
+  # Dot transparency (RFC 5321 Section 4.5.2):
+  # Lines starting with "." must be escaped by prepending an extra ".".
+  var stuffed = msg.replace("\c\L.", "\c\L..")
+  if stuffed.startsWith("."):
+    stuffed = "." & stuffed
+  await smtp.send(stuffed & "\c\L")
   await smtp.send(".\c\L")
   await smtp.checkReply("250")
 
