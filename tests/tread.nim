@@ -14,7 +14,8 @@ proc servOnce(payload: string): Future[Port] {.async.} =
   proc serve() {.async.} =
     let client = await server.accept()
     let writer = newAsyncStreamWriter(client)
-    await writer.write(payload)
+    if payload.len > 0:
+      await writer.write(payload)
     await writer.closeWait()
     await client.closeWait()
     server.stop()
@@ -107,14 +108,16 @@ suite "read – multiline response parsing":
     waitFor runTest()
 
   test "checkReply fails on wrong code":
+    var raised = false
+
     proc runTest() {.async.} =
       let port = await servOnce("550 Denied\r\n")
       let smtp = await connectRaw(port)
       try:
         await smtp.checkReply("250", quitWhenFailed = false)
-        fail()
       except ReplyError:
-        discard
+        raised = true
       await smtp.closeSmtp()
 
     waitFor runTest()
+    check raised
