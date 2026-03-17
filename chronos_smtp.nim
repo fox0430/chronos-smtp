@@ -310,6 +310,15 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   await smtp.send(starttlsCommand())
   await smtp.checkReply("220")
 
+  # Close the old plain-text reader/writer to avoid leaking them
+  var closeFuts: seq[Future[void]]
+  if not smtp.reader.isNil and not smtp.reader.closed:
+    closeFuts.add smtp.reader.closeWait
+  if not smtp.writer.isNil and not smtp.writer.closed:
+    closeFuts.add smtp.writer.closeWait
+  if closeFuts.len > 0:
+    await noCancel(allFutures(closeFuts))
+
   let
     treader = newAsyncStreamReader(smtp.transp)
     twriter = newAsyncStreamWriter(smtp.transp)
@@ -327,6 +336,7 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
     flags: flags,
     host: smtp.host,
     port: smtp.port,
+    logs: smtp.logs,
   )
   smtp[] = newSmtp[]
 
