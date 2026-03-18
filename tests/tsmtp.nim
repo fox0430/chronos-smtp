@@ -1,8 +1,9 @@
-import std/unittest
+import std/[unittest, importutils]
 
 import pkg/chronos
 
 import ../chronos_smtp {.all.}
+privateAccess(Smtp)
 
 suite "sendMail":
   test "Basic":

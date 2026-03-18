@@ -1,9 +1,10 @@
-import std/[strutils, unittest]
+import std/[strutils, unittest, importutils]
 
 import pkg/chronos
 import pkg/chronos/transports/stream
 
 import ../chronos_smtp {.all.}
+privateAccess(Smtp)
 
 # A minimal SMTP server that accepts one message and captures the DATA payload.
 # Performs dot de-stuffing per RFC 5321: strips one leading dot from lines
