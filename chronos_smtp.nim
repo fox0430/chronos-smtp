@@ -27,6 +27,10 @@ type
     msgOtherHeaders: StringTableRef
     msgBody: string
 
+  AuthMethod* = enum
+    AuthLogin
+    AuthPlain
+
   SmtpError* = object of AsyncError
   ReplyError* = object of IOError
 
@@ -87,8 +91,11 @@ proc expnCommand*(param: string): string {.inline.} =
 proc resetCommand*(): string {.inline.} =
   "RSET\c\L"
 
-proc authCommand*(): string {.inline.} =
+proc authLoginCommand*(): string {.inline.} =
   "AUTH LOGIN\c\L"
+
+proc authPlainCommand*(username, password: string): string {.inline.} =
+  "AUTH PLAIN " & encode("\0" & username & "\0" & password) & "\c\L"
 
 proc containsNewline(xs: seq[string]): bool =
   for x in xs:
@@ -393,20 +400,33 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
   if not speaksEsmtp:
     await smtp.helo
 
-proc auth*(smtp: Smtp, username, password: string) {.async.} =
+proc checkChallenge(smtp: Smtp, expected: string) {.async.} =
+  ## Read a 334 challenge response and verify its payload matches `expected`.
+  let line = await smtp.read
+  if not line.startsWith("334"):
+    await quitExcpt(smtp, "Expected 334 reply, got: " & line)
+  let payload = line[4 ..^ 1].strip()
+  if payload != expected:
+    await quitExcpt(smtp, "Unexpected 334 challenge: " & payload)
+
+proc auth*(
+    smtp: Smtp, username, password: string, authMethod: AuthMethod = AuthLogin
+) {.async.} =
   ## Sends an AUTH command to the server to login as the `username`
   ## using `password`.
   ## May fail with ReplyError.
 
-  await smtp.send(authCommand())
-  await smtp.checkReply("334")
-    # TODO: Check whether it's asking for the "Username:"
-    # i.e "334 VXNlcm5hbWU6"
-  await smtp.send(encode(username) & "\c\L")
-  await smtp.checkReply("334") # TODO: Same as above, only "Password:" (I think?)
-
-  await smtp.send(encode(password) & "\c\L")
-  await smtp.checkReply("235") # Check whether the authentication was successful.
+  case authMethod
+  of AuthLogin:
+    await smtp.send(authLoginCommand())
+    await smtp.checkChallenge("VXNlcm5hbWU6") # Base64 "Username:"
+    await smtp.send(encode(username) & "\c\L")
+    await smtp.checkChallenge("UGFzc3dvcmQ6") # Base64 "Password:"
+    await smtp.send(encode(password) & "\c\L")
+    await smtp.checkReply("235")
+  of AuthPlain:
+    await smtp.send(authPlainCommand(username, password))
+    await smtp.checkReply("235")
 
 proc sendMail*(
     smtp: Smtp, fromAddr: string, toAddrs: seq[string], msg: string
