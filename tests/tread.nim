@@ -1,9 +1,10 @@
-import std/[strutils, unittest]
+import std/[strutils, unittest, importutils]
 
 import pkg/chronos
 import pkg/chronos/transports/stream
 
 import ../chronos_smtp {.all.}
+privateAccess(Smtp)
 
 # Helper: start a local TCP server that sends `payload` then closes.
 proc servOnce(payload: string): Future[Port] {.async.} =

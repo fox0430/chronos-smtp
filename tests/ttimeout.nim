@@ -1,9 +1,10 @@
-import std/unittest
+import std/[unittest, importutils]
 
 import pkg/chronos
 import pkg/chronos/transports/stream
 
 import ../chronos_smtp {.all.}
+privateAccess(Smtp)
 
 const shortTimeout = 50.milliseconds
 
