@@ -175,9 +175,9 @@ proc `$`*(msg: Message): string =
   ## stringify for `Message`.
   result = ""
   if msg.msgTo.len() > 0:
-    result = "TO: " & msg.msgTo.join(", ") & "\c\L"
+    result = "To: " & msg.msgTo.join(", ") & "\c\L"
   if msg.msgCc.len() > 0:
-    result.add("CC: " & msg.msgCc.join(", ") & "\c\L")
+    result.add("Cc: " & msg.msgCc.join(", ") & "\c\L")
   # TODO: Folding? i.e when a line is too long, shorten it...
   result.add("Subject: " & msg.msgSubject & "\c\L")
   for key, value in pairs(msg.msgOtherHeaders):
