@@ -173,7 +173,6 @@ proc createMessage*(
 
 proc `$`*(msg: Message): string =
   ## stringify for `Message`.
-  result = ""
   if msg.msgTo.len() > 0:
     result = "To: " & msg.msgTo.join(", ") & "\c\L"
   if msg.msgCc.len() > 0:
