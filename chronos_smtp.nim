@@ -36,15 +36,15 @@ type
     of SmtpClientScheme.NonSecure:
       discard
     of SmtpClientScheme.Secure:
-      treader*: AsyncStreamReader
-      twriter*: AsyncStreamWriter
-      tls*: TLSAsyncStream
-      flags*: set[TLSFlags]
-    transp*: StreamTransport
-    reader*: AsyncStreamReader
-    writer*: AsyncStreamWriter
-    host*: string
-    port*: Port
+      treader: AsyncStreamReader
+      twriter: AsyncStreamWriter
+      tls: TLSAsyncStream
+      flags: set[TLSFlags]
+    transp: StreamTransport
+    reader: AsyncStreamReader
+    writer: AsyncStreamWriter
+    host: string
+    port: Port
     timeout*: Duration
     logs*: seq[string]
 
