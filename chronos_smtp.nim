@@ -34,23 +34,26 @@ type
   SmtpError* = object of AsyncError
   ReplyError* = object of IOError
 
+  TlsContext = object
+    treader: AsyncStreamReader
+    twriter: AsyncStreamWriter
+    stream: TLSAsyncStream
+    flags: set[TLSFlags]
+
   Smtp* = ref object
     closed*: bool
-    case kind*: SmtpClientScheme
-    of SmtpClientScheme.NonSecure:
-      discard
-    of SmtpClientScheme.Secure:
-      treader: AsyncStreamReader
-      twriter: AsyncStreamWriter
-      tls: TLSAsyncStream
-      flags: set[TLSFlags]
+    tlsCtx: TlsContext
     transp: StreamTransport
     reader: AsyncStreamReader
     writer: AsyncStreamWriter
     host: string
     port: Port
+    useTls: bool
     timeout*: Duration
     logs*: seq[string]
+
+proc kind*(smtp: Smtp): SmtpClientScheme =
+  if smtp.useTls: SmtpClientScheme.Secure else: SmtpClientScheme.NonSecure
 
 proc heloCommand*(param: string): string {.inline.} =
   "HELO " & param & "\c\L"
@@ -193,10 +196,7 @@ proc `$`*(msg: Message): string =
   result.add(msg.msgBody)
 
 proc newSmtp*(useTls: bool = false, timeout = InfiniteDuration): Smtp =
-  if useTls:
-    return Smtp(kind: SmtpClientScheme.Secure, timeout: timeout)
-  else:
-    return Smtp(kind: SmtpClientScheme.NonSecure, timeout: timeout)
+  Smtp(useTls: useTls, timeout: timeout)
 
 proc checkReply*(smtp: Smtp, reply: string, quitWhenFailed: bool = true) {.async.} =
   let line = await smtp.read
@@ -240,11 +240,10 @@ proc cleanupResources(smtp: Smtp) {.async.} =
     futs.add smtp.reader.closeWait
   if not smtp.writer.isNil and not smtp.writer.closed:
     futs.add smtp.writer.closeWait
-  if smtp.kind == SmtpClientScheme.Secure:
-    if not smtp.treader.isNil and not smtp.treader.closed:
-      futs.add smtp.treader.closeWait
-    if not smtp.twriter.isNil and not smtp.twriter.closed:
-      futs.add smtp.twriter.closeWait
+  if not smtp.tlsCtx.treader.isNil and not smtp.tlsCtx.treader.closed:
+    futs.add smtp.tlsCtx.treader.closeWait
+  if not smtp.tlsCtx.twriter.isNil and not smtp.tlsCtx.twriter.closed:
+    futs.add smtp.tlsCtx.twriter.closeWait
   if not smtp.transp.isNil:
     futs.add smtp.transp.closeWait
   if futs.len > 0:
@@ -278,11 +277,10 @@ proc connect*(
       smtp.host = host
       smtp.port = port
 
-      case smtp.kind
-      of SmtpClientScheme.NonSecure:
+      if not smtp.useTls:
         smtp.reader = newAsyncStreamReader(smtp.transp)
         smtp.writer = newAsyncStreamWriter(smtp.transp)
-      of SmtpClientScheme.Secure:
+      else:
         let
           treader = newAsyncStreamReader(smtp.transp)
           twriter = newAsyncStreamWriter(smtp.transp)
@@ -299,12 +297,10 @@ proc connect*(
               await noCancel(allFutures(futs))
               continue
 
-        smtp.transp = transp
-        smtp.treader = treader
-        smtp.twriter = twriter
+        smtp.tlsCtx =
+          TlsContext(treader: treader, twriter: twriter, stream: tls, flags: flags)
         smtp.reader = tls.reader
         smtp.writer = tls.writer
-        smtp.tls = tls
 
       try:
         await smtp.checkReply("220", quitWhenFailed)
@@ -380,21 +376,11 @@ proc startTls*(smtp: Smtp, flags: set[TLSFlags] = {}) {.async.} =
     await noCancel(allFutures(closeFuts))
 
   # Upgrade to TLS stream
-  var newSmtp = Smtp(
-    kind: SmtpClientScheme.Secure,
-    transp: smtp.transp,
-    treader: treader,
-    twriter: twriter,
-    tls: tls,
-    reader: tls.reader,
-    writer: tls.writer,
-    flags: flags,
-    host: smtp.host,
-    port: smtp.port,
-    timeout: smtp.timeout,
-    logs: smtp.logs,
-  )
-  smtp[] = newSmtp[]
+  smtp.useTls = true
+  smtp.tlsCtx =
+    TlsContext(treader: treader, twriter: twriter, stream: tls, flags: flags)
+  smtp.reader = tls.reader
+  smtp.writer = tls.writer
 
   let speaksEsmtp = await smtp.ehlo
   if not speaksEsmtp:
