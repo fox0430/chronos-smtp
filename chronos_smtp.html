@@ -63,15 +63,6 @@
   of SmtpClientScheme.NonSecure:
     nil
   of SmtpClientScheme.Secure:
-    treader*: AsyncStreamReader
-    twriter*: AsyncStreamWriter
-    tls*: TLSAsyncStream
-    flags*: set[TLSFlags]
-  transp*: StreamTransport
-  reader*: AsyncStreamReader
-  writer*: AsyncStreamWriter
-  host*: string
-  port*: Port
   timeout*: Duration
   logs*: seq[string]">Smtp</a></li>
 <li><a class="reference" href="#SmtpClientScheme" title="SmtpClientScheme {.pure.} = enum
@@ -257,15 +248,6 @@
   <span class="Keyword">of</span> <span class="Identifier">SmtpClientScheme</span><span class="Other">.</span><span class="Identifier">NonSecure</span><span class="Other">:</span>
     <span class="Keyword">nil</span>
   <span class="Keyword">of</span> <span class="Identifier">SmtpClientScheme</span><span class="Other">.</span><span class="Identifier">Secure</span><span class="Other">:</span>
-    <span class="Identifier">treader</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">AsyncStreamReader</span>
-    <span class="Identifier">twriter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">AsyncStreamWriter</span>
-    <span class="Identifier">tls</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">TLSAsyncStream</span>
-    <span class="Identifier">flags</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><span class="Identifier">TLSFlags</span><span class="Other">]</span>
-  <span class="Identifier">transp</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">StreamTransport</span>
-  <span class="Identifier">reader</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">AsyncStreamReader</span>
-  <span class="Identifier">writer</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">AsyncStreamWriter</span>
-  <span class="Identifier">host</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
-  <span class="Identifier">port</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Port</span>
   <span class="Identifier">timeout</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Duration</span>
   <span class="Identifier">logs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span></pre></dt>
   <dd>
@@ -682,7 +664,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-03-18 06:51:33 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-03-18 07:46:44 UTC</small>
       </div>
     </div>
   </div>
