@@ -102,7 +102,7 @@ proc hangAfterDataServer(): Future[Port] {.async.} =
 
 # Helper: connect raw with a specific timeout.
 proc connectRaw(port: Port, timeout: Duration): Future[Smtp] {.async.} =
-  let smtp = Smtp(kind: SmtpClientScheme.NonSecure, timeout: timeout)
+  let smtp = Smtp(timeout: timeout)
   let transp = await connect(initTAddress("127.0.0.1", port))
   smtp.transp = transp
   smtp.reader = newAsyncStreamReader(transp)
