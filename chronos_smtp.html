@@ -61,10 +61,6 @@
 <li><a class="reference" href="#ReplyError" title="ReplyError = object of IOError">ReplyError</a></li>
 <li><a class="reference" href="#Smtp" title="Smtp = ref object
   closed*: bool
-  case kind*: SmtpClientScheme
-  of SmtpClientScheme.NonSecure:
-    nil
-  of SmtpClientScheme.Secure:
   timeout*: Duration
   logs*: seq[string]">Smtp</a></li>
 <li><a class="reference" href="#SmtpClientScheme" title="SmtpClientScheme {.pure.} = enum
@@ -153,6 +149,10 @@
 </ul>
 <ul class="simple nested-toc-section">helpCommand
   <li><a class="reference" href="#helpCommand%2Cstring" title="helpCommand(param: string): string">helpCommand(param: string): string</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">kind
+  <li><a class="reference" href="#kind%2CSmtp" title="kind(smtp: Smtp): SmtpClientScheme">kind(smtp: Smtp): SmtpClientScheme</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">lhlo
@@ -261,10 +261,6 @@
 <div id="Smtp">
   <dt><pre><a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
   <span class="Identifier">closed</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
-  <span class="Keyword">case</span> <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="chronos_smtp.html#SmtpClientScheme"><span class="Identifier">SmtpClientScheme</span></a>
-  <span class="Keyword">of</span> <span class="Identifier">SmtpClientScheme</span><span class="Other">.</span><span class="Identifier">NonSecure</span><span class="Other">:</span>
-    <span class="Keyword">nil</span>
-  <span class="Keyword">of</span> <span class="Identifier">SmtpClientScheme</span><span class="Other">.</span><span class="Identifier">Secure</span><span class="Other">:</span>
   <span class="Identifier">timeout</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Duration</span>
   <span class="Identifier">logs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span></pre></dt>
   <dd>
@@ -505,6 +501,17 @@
 </div>
 
 </div>
+<div id="kind-procs-all">
+  <div id="kind,Smtp">
+  <dt><pre><span class="Keyword">proc</span> <a href="#kind%2CSmtp"><span class="Identifier">kind</span></a><span class="Other">(</span><span class="Identifier">smtp</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">)</span><span class="Other">:</span> <a href="chronos_smtp.html#SmtpClientScheme"><span class="Identifier">SmtpClientScheme</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+
+</div>
 <div id="lhlo-procs-all">
   <div id="lhlo,Smtp">
   <dt><pre><span class="Keyword">proc</span> <a href="#lhlo%2CSmtp"><span class="Identifier">lhlo</span></a><span class="Other">(</span><span class="Identifier">smtp</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span>
@@ -694,7 +701,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-03-18 08:54:49 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-03-18 09:16:24 UTC</small>
       </div>
     </div>
   </div>
