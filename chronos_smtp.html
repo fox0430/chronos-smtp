@@ -55,7 +55,9 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#Message" title="Message = object">Message</a></li>
+      <li><a class="reference" href="#AuthMethod" title="AuthMethod = enum
+  AuthLogin, AuthPlain">AuthMethod</a></li>
+<li><a class="reference" href="#Message" title="Message = object">Message</a></li>
 <li><a class="reference" href="#ReplyError" title="ReplyError = object of IOError">ReplyError</a></li>
 <li><a class="reference" href="#Smtp" title="Smtp = ref object
   closed*: bool
@@ -81,11 +83,17 @@
 
 </ul>
 <ul class="simple nested-toc-section">auth
-  <li><a class="reference" href="#auth%2CSmtp%2Cstring%2Cstring" title="auth(smtp: Smtp; username, password: string): Future[void]">auth(smtp: Smtp; username, password: string): Future[void]</a></li>
+  <li><a class="reference" href="#auth%2CSmtp%2Cstring%2Cstring%2CAuthMethod" title="auth(smtp: Smtp; username, password: string; authMethod: AuthMethod = AuthLogin): Future[
+    void]">auth(smtp: Smtp; username, password: string; authMethod: AuthMethod = AuthLogin): Future[
+    void]</a></li>
 
 </ul>
-<ul class="simple nested-toc-section">authCommand
-  <li><a class="reference" href="#authCommand" title="authCommand(): string">authCommand(): string</a></li>
+<ul class="simple nested-toc-section">authLoginCommand
+  <li><a class="reference" href="#authLoginCommand" title="authLoginCommand(): string">authLoginCommand(): string</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">authPlainCommand
+  <li><a class="reference" href="#authPlainCommand%2Cstring%2Cstring" title="authPlainCommand(username, password: string): string">authPlainCommand(username, password: string): string</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">checkReply
@@ -225,7 +233,16 @@
     <div class="section" id="7">
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
-    <div id="Message">
+    <div id="AuthMethod">
+  <dt><pre><a href="chronos_smtp.html#AuthMethod"><span class="Identifier">AuthMethod</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">AuthLogin</span><span class="Other">,</span> <span class="Identifier">AuthPlain</span></pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+<div id="Message">
   <dt><pre><a href="chronos_smtp.html#Message"><span class="Identifier">Message</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
@@ -291,9 +308,10 @@
 
 </div>
 <div id="auth-procs-all">
-  <div id="auth,Smtp,string,string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#auth%2CSmtp%2Cstring%2Cstring"><span class="Identifier">auth</span></a><span class="Other">(</span><span class="Identifier">smtp</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">;</span> <span class="Identifier">username</span><span class="Other">,</span> <span class="Identifier">password</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="auth,Smtp,string,string,AuthMethod">
+  <dt><pre><span class="Keyword">proc</span> <a href="#auth%2CSmtp%2Cstring%2Cstring%2CAuthMethod"><span class="Identifier">auth</span></a><span class="Other">(</span><span class="Identifier">smtp</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">;</span> <span class="Identifier">username</span><span class="Other">,</span> <span class="Identifier">password</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
+          <span class="Identifier">authMethod</span><span class="Other">:</span> <a href="chronos_smtp.html#AuthMethod"><span class="Identifier">AuthMethod</span></a> <span class="Other">=</span> <span class="Identifier">AuthLogin</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">stackTrace</span><span class="Other">:</span> <span class="DecNumber">false</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Sends an AUTH command to the server to login as the <tt class="docutils literal"><span class="pre"><span class="Identifier">username</span></span></tt> using <tt class="docutils literal"><span class="pre"><span class="Identifier">password</span></span></tt>. May fail with ReplyError.
@@ -302,9 +320,21 @@
 </div>
 
 </div>
-<div id="authCommand-procs-all">
-  <div id="authCommand">
-  <dt><pre><span class="Keyword">proc</span> <a href="#authCommand"><span class="Identifier">authCommand</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<div id="authLoginCommand-procs-all">
+  <div id="authLoginCommand">
+  <dt><pre><span class="Keyword">proc</span> <a href="#authLoginCommand"><span class="Identifier">authLoginCommand</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+
+</div>
+<div id="authPlainCommand-procs-all">
+  <div id="authPlainCommand,string,string">
+  <dt><pre><span class="Keyword">proc</span> <a href="#authPlainCommand%2Cstring%2Cstring"><span class="Identifier">authPlainCommand</span></a><span class="Other">(</span><span class="Identifier">username</span><span class="Other">,</span> <span class="Identifier">password</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -664,7 +694,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-03-18 08:16:58 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-03-18 08:54:49 UTC</small>
       </div>
     </div>
   </div>
