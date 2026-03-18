@@ -4,7 +4,8 @@
 # Copyright (c) 2012 Dominik Picheta
 # https://github.com/nim-lang/smtp/blob/master/LICENSE
 
-import std/[base64, strtabs, strutils, strformat]
+import std/[base64, strtabs, strutils, strformat, sysrand]
+from std/times import now, utc, format, toTime, toUnix
 
 import
   pkg/chronos,
@@ -105,6 +106,19 @@ proc containsNewline(xs: seq[string]): bool =
     if x.contains({'\c', '\L'}):
       return true
 
+proc generateDate(): string =
+  ## Generate a date string in RFC 5322 format.
+  now().utc.format("ddd, dd MMM yyyy HH:mm:ss '+0000'")
+
+proc generateMessageId(domain: string = "localhost"): string =
+  ## Generate a unique Message-ID in RFC 5322 format.
+  var randomBytes: array[8, byte]
+  doAssert urandom(randomBytes)
+  var hex = ""
+  for b in randomBytes:
+    hex.add(b.toHex(2).toLowerAscii())
+  "<" & $now().toTime.toUnix & "." & hex & "@" & domain & ">"
+
 proc send*(smtp: Smtp, cmd: string) {.async.} =
   smtp.logs.add fmt"Client: {cmd}"
   debug "Client:", cmd
@@ -160,6 +174,11 @@ proc createMessage*(
   for n, v in items(otherHeaders):
     result.msgOtherHeaders[n] = v
 
+  if "Date" notin result.msgOtherHeaders:
+    result.msgOtherHeaders["Date"] = generateDate()
+  if "Message-ID" notin result.msgOtherHeaders:
+    result.msgOtherHeaders["Message-ID"] = generateMessageId()
+
 proc createMessage*(
     mSubject, mBody: string, mTo: seq[string] = @[], mCc: seq[string] = @[]
 ): Message =
@@ -167,19 +186,7 @@ proc createMessage*(
   ##
   ## You need to make sure that `mSubject`, `mTo` and `mCc` don't contain
   ## any newline characters. Failing to do so will raise `AssertionDefect`.
-  doAssert(
-    not mSubject.contains({'\c', '\L'}),
-    "'mSubject' shouldn't contain any newline characters",
-  )
-  doAssert(
-    not (mTo.containsNewline() or mCc.containsNewline()),
-    "'mTo' and 'mCc' shouldn't contain any newline characters",
-  )
-  result.msgTo = mTo
-  result.msgCc = mCc
-  result.msgSubject = mSubject
-  result.msgBody = mBody
-  result.msgOtherHeaders = newStringTable()
+  createMessage(mSubject, mBody, mTo, mCc, {:})
 
 proc `$`*(msg: Message): string =
   ## stringify for `Message`.
