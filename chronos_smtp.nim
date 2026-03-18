@@ -206,8 +206,9 @@ proc helo*(smtp: Smtp) {.async.} =
   await smtp.checkReply("250")
 
 proc lhlo*(smtp: Smtp) {.async.} =
-  # Sends the LHLO request (for LMTP)
+  ## Sends the LHLO request (for LMTP)
   await smtp.send(lhloCommand(smtp.host))
+  await smtp.checkReply("250")
 
 proc readEhlo(smtp: Smtp): Future[bool] {.async.} =
   ## Skips "250-" lines, read until "250 " found.
