@@ -33,7 +33,7 @@ type
     AuthPlain
 
   SmtpError* = object of AsyncError
-  ReplyError* = object of IOError
+  ReplyError* = object of SmtpError
 
   TlsContext = object
     treader: AsyncStreamReader

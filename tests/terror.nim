@@ -127,3 +127,18 @@ suite "error – sendMail ReplyError":
     waitFor runTest(addr errMsg)
     check raised
     check "554" in errMsg
+
+  test "ReplyError is catchable as SmtpError":
+    var raised = false
+
+    proc runTest() {.async.} =
+      let port = await rejectServer(rsMailFrom, "550")
+      let smtp = await dial("127.0.0.1", port)
+      try:
+        await smtp.sendMail("from@example.com", @["to@example.com"], "test")
+      except SmtpError:
+        raised = true
+      await smtp.close(quit = false)
+
+    waitFor runTest()
+    check raised
