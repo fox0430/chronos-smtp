@@ -184,7 +184,7 @@ proc createMessage*(
   ## Alternate version of the above.
   ##
   ## You need to make sure that `mSubject`, `mTo` and `mCc` don't contain
-  ## any newline characters. Failing to do so will raise `AssertionDefect`.
+  ## any newline characters. Failing to do so will raise `ValueError`.
   createMessage(mSubject, mBody, mTo, mCc, {:})
 
 proc `$`*(msg: Message): string =
@@ -420,7 +420,7 @@ proc sendMail*(
   ## Message into a string.
   ##
   ## You need to make sure that `fromAddr` and `toAddrs` don't contain
-  ## any newline characters. Failing to do so will raise `AssertionDefect`.
+  ## any newline characters. Failing to do so will raise `ValueError`.
   if toAddrs.containsNewline() or fromAddr.contains({'\c', '\L'}):
     raise newException(
       ValueError, "'toAddrs' and 'fromAddr' shouldn't contain any newline characters"
