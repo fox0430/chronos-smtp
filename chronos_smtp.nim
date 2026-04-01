@@ -113,7 +113,8 @@ proc generateDate(): string =
 proc generateMessageId(domain: string = "localhost"): string =
   ## Generate a unique Message-ID in RFC 5322 format.
   var randomBytes: array[8, byte]
-  doAssert urandom(randomBytes)
+  if not urandom(randomBytes):
+    raise newException(ValueError, "Failed to generate random bytes")
   var hex = ""
   for b in randomBytes:
     hex.add(b.toHex(2).toLowerAscii())
