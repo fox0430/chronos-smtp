@@ -121,8 +121,9 @@ proc generateMessageId(domain: string = "localhost"): string =
   "<" & $now().toTime.toUnix & "." & hex & "@" & domain & ">"
 
 proc send*(smtp: Smtp, cmd: string) {.async.} =
-  smtp.logs.add fmt"Client: {cmd}"
-  debug "Client:", cmd
+  let trimmed = cmd.strip(leading = false, chars = {'\c', '\L'})
+  smtp.logs.add fmt"Client: {trimmed}"
+  debug "Client:", trimmed
 
   await smtp.writer.write(cmd).wait(smtp.timeout)
 
