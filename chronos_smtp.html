@@ -214,6 +214,10 @@
   <li><a class="reference" href="#starttlsCommand" title="starttlsCommand(): string">starttlsCommand(): string</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">supportsExtension
+  <li><a class="reference" href="#supportsExtension%2CSmtp%2Cstring" title="supportsExtension(smtp: Smtp; name: string): bool">supportsExtension(smtp: Smtp; name: string): bool</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">vrfyCommand
   <li><a class="reference" href="#vrfyCommand%2Cstring" title="vrfyCommand(param: string): string">vrfyCommand(param: string): string</a></li>
 
@@ -681,6 +685,18 @@
 </div>
 
 </div>
+<div id="supportsExtension-procs-all">
+  <div id="supportsExtension,Smtp,string">
+  <dt><pre><span class="Keyword">proc</span> <a href="#supportsExtension%2CSmtp%2Cstring"><span class="Identifier">supportsExtension</span></a><span class="Other">(</span><span class="Identifier">smtp</span><span class="Other">:</span> <a href="chronos_smtp.html#Smtp"><span class="Identifier">Smtp</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Check if the server advertised a given ESMTP extension. The comparison is case-insensitive and matches the extension keyword (e.g. &quot;STARTTLS&quot;, &quot;AUTH&quot;).
+    
+  </dd>
+</div>
+
+</div>
 <div id="vrfyCommand-procs-all">
   <div id="vrfyCommand,string">
   <dt><pre><span class="Keyword">proc</span> <a href="#vrfyCommand%2Cstring"><span class="Identifier">vrfyCommand</span></a><span class="Other">(</span><span class="Identifier">param</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
@@ -703,7 +719,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-04-01 07:44:26 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-04-01 08:08:14 UTC</small>
       </div>
     </div>
   </div>
