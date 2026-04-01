@@ -311,9 +311,6 @@ proc connect*(
       except CatchableError as e:
         await noCancel(smtp.cleanupResources)
         raise e
-      except CancelledError as e:
-        await noCancel(smtp.cleanupResources)
-        raise e
 
       return
 
@@ -336,9 +333,6 @@ proc dial*(
   let smtp = newSmtp(useTls, timeout)
   try:
     await smtp.connect(host, port, flags, helo, quitWhenFailed)
-  except CancelledError as e:
-    await noCancel(smtp.cleanupResources)
-    raise e
   except CatchableError as e:
     await noCancel(smtp.cleanupResources)
     raise e
