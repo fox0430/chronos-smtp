@@ -226,6 +226,34 @@ suite "ehlo":
     waitFor runTest()
     check speaksEsmtp
 
+  test "ehlo populates extensions":
+    proc runTest(): Future[seq[string]] {.async.} =
+      let port = await ehloServer(@["localhost", "SIZE 10240000", "AUTH LOGIN PLAIN"])
+      let smtp = await connectRaw(port)
+      discard await smtp.reader.readLine() # consume greeting
+      discard await smtp.ehlo
+      result = smtp.extensions
+      await smtp.closeSmtp()
+
+    let extensions = waitFor runTest()
+    check extensions.len == 2
+    check extensions[0] == "SIZE 10240000"
+    check extensions[1] == "AUTH LOGIN PLAIN"
+
+  test "ehlo clears extensions on subsequent call":
+    proc runTest(): Future[seq[string]] {.async.} =
+      let port = await ehloServer(@["localhost", "SIZE 10240000"])
+      let smtp = await connectRaw(port)
+      discard await smtp.reader.readLine() # consume greeting
+      smtp.extensions = @["OLD"]
+      discard await smtp.ehlo
+      result = smtp.extensions
+      await smtp.closeSmtp()
+
+    let extensions = waitFor runTest()
+    check extensions.len == 1
+    check extensions[0] == "SIZE 10240000"
+
   test "ehlo returns false when server rejects":
     var speaksEsmtp = true
 
