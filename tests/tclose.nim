@@ -78,3 +78,38 @@ suite "close":
 
     waitFor runTest()
     check wasClosed
+
+  test "closed flag is true after cleanupResources":
+    ## When connect fails after TCP succeeds (e.g. bad greeting),
+    ## cleanupResources sets the closed flag.
+    var wasClosed = false
+
+    proc badGreetingServer(): Future[Port] {.async.} =
+      let server =
+        createStreamServer(initTAddress("127.0.0.1:0"), flags = {ServerFlags.ReuseAddr})
+      let port = server.localAddress.port
+
+      proc serve() {.async.} =
+        let client = await server.accept()
+        let writer = newAsyncStreamWriter(client)
+        # Send a rejection greeting
+        await writer.write("421 Service not available\r\n")
+        await writer.closeWait()
+        await client.closeWait()
+        server.stop()
+        server.close()
+
+      asyncSpawn serve()
+      return port
+
+    proc runTest() {.async.} =
+      let port = await badGreetingServer()
+      let smtp = newSmtp()
+      try:
+        await smtp.connect("127.0.0.1", port)
+      except ReplyError:
+        discard
+      wasClosed = smtp.closed
+
+    waitFor runTest()
+    check wasClosed

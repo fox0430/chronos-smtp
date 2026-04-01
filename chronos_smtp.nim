@@ -245,6 +245,8 @@ proc cleanupResources(smtp: Smtp) {.async.} =
   if futs.len > 0:
     await noCancel(allFutures(futs))
 
+  smtp.closed = true
+
 proc connect*(
     smtp: Smtp,
     host: string,
@@ -455,5 +457,3 @@ proc close*(smtp: Smtp, quit: bool = true) {.async.} =
       discard
 
   await noCancel(smtp.cleanupResources)
-
-  smtp.closed = true
