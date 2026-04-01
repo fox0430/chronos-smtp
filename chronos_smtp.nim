@@ -43,6 +43,7 @@ type
 
   Smtp* = ref object
     closed*: bool
+    extensions*: seq[string]
     tlsCtx: TlsContext
     transp: StreamTransport
     reader: AsyncStreamReader
@@ -227,9 +228,19 @@ proc lhlo*(smtp: Smtp) {.async.} =
 proc ehlo*(smtp: Smtp): Future[bool] {.async.} =
   ## Sends EHLO request.
   ## Return `true` if server supports `EHLO`, false otherwise.
+  ## When successful, server-advertised extensions are stored in `extensions`.
   await smtp.send(ehloCommand(smtp.host))
   let reply = await smtp.read
-  return reply.startsWith("250")
+  if not reply.startsWith("250"):
+    return false
+  smtp.extensions.setLen(0)
+  let lines = reply.split('\n')
+  for i in 1 ..< lines.len:
+    # Each line is "250-EXT" or "250 EXT"; skip the status prefix.
+    let line = lines[i]
+    if line.len > 4:
+      smtp.extensions.add(line[4 ..^ 1])
+  return true
 
 proc cleanupResources(smtp: Smtp) {.async.} =
   ## Close all open streams and transport on the smtp object.
