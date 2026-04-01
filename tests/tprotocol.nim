@@ -254,6 +254,28 @@ suite "ehlo":
     check extensions.len == 1
     check extensions[0] == "SIZE 10240000"
 
+  test "supportsExtension matches advertised extension":
+    proc runTest(): Future[Smtp] {.async.} =
+      let port = await ehloServer(
+        @["localhost", "SIZE 10240000", "AUTH LOGIN PLAIN", "STARTTLS"]
+      )
+      let smtp = await connectRaw(port)
+      discard await smtp.reader.readLine() # consume greeting
+      discard await smtp.ehlo
+      return smtp
+
+    let smtp = waitFor runTest()
+    check smtp.supportsExtension("SIZE")
+    check smtp.supportsExtension("AUTH")
+    check smtp.supportsExtension("STARTTLS")
+    check smtp.supportsExtension("starttls")
+    check not smtp.supportsExtension("CHUNKING")
+    waitFor smtp.closeSmtp()
+
+  test "supportsExtension returns false when no extensions":
+    let smtp = newSmtp()
+    check not smtp.supportsExtension("STARTTLS")
+
   test "ehlo returns false when server rejects":
     var speaksEsmtp = true
 
