@@ -447,6 +447,7 @@ proc close*(smtp: Smtp, quit: bool = true) {.async.} =
   if quit:
     try:
       await smtp.send(quitCommand())
+      discard await smtp.read() # Consume 221 reply; already logged by read()
     except CancelledError as e:
       raise e
     except CatchableError:
