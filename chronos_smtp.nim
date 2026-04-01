@@ -115,7 +115,7 @@ proc generateMessageId(domain: string = "localhost"): string =
   var randomBytes: array[8, byte]
   if not urandom(randomBytes):
     raise newException(ValueError, "Failed to generate random bytes")
-  var hex = ""
+  var hex = newStringOfCap(16)
   for b in randomBytes:
     hex.add(b.toHex(2).toLowerAscii())
   "<" & $now().toTime.toUnix & "." & hex & "@" & domain & ">"
