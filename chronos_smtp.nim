@@ -157,14 +157,13 @@ proc createMessage*(
   ##
   ## You need to make sure that `mSubject`, `mTo` and `mCc` don't contain
   ## any newline characters. Failing to do so will raise `AssertionDefect`.
-  doAssert(
-    not mSubject.contains({'\c', '\L'}),
-    "'mSubject' shouldn't contain any newline characters",
-  )
-  doAssert(
-    not (mTo.containsNewline() or mCc.containsNewline()),
-    "'mTo' and 'mCc' shouldn't contain any newline characters",
-  )
+  if mSubject.contains({'\c', '\L'}):
+    raise
+      newException(ValueError, "'mSubject' shouldn't contain any newline characters")
+  if mTo.containsNewline() or mCc.containsNewline():
+    raise newException(
+      ValueError, "'mTo' and 'mCc' shouldn't contain any newline characters"
+    )
 
   result.msgTo = mTo
   result.msgCc = mCc
@@ -430,10 +429,10 @@ proc sendMail*(
   ##
   ## You need to make sure that `fromAddr` and `toAddrs` don't contain
   ## any newline characters. Failing to do so will raise `AssertionDefect`.
-  doAssert(
-    not (toAddrs.containsNewline() or fromAddr.contains({'\c', '\L'})),
-    "'toAddrs' and 'fromAddr' shouldn't contain any newline characters",
-  )
+  if toAddrs.containsNewline() or fromAddr.contains({'\c', '\L'}):
+    raise newException(
+      ValueError, "'toAddrs' and 'fromAddr' shouldn't contain any newline characters"
+    )
 
   await smtp.send(mailCommand(fromAddr))
   await smtp.checkReply("250")
