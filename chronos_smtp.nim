@@ -57,6 +57,14 @@ type
 proc kind*(smtp: Smtp): SmtpClientScheme =
   if smtp.useTls: SmtpClientScheme.Secure else: SmtpClientScheme.NonSecure
 
+proc supportsExtension*(smtp: Smtp, name: string): bool =
+  ## Check if the server advertised a given ESMTP extension.
+  ## The comparison is case-insensitive and matches the extension keyword
+  ## (e.g. "STARTTLS", "AUTH").
+  for ext in smtp.extensions:
+    if ext.toUpperAscii.startsWith(name.toUpperAscii):
+      return true
+
 proc heloCommand*(param: string): string {.inline.} =
   "HELO " & param & "\c\L"
 
