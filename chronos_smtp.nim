@@ -222,22 +222,12 @@ proc lhlo*(smtp: Smtp) {.async.} =
   await smtp.send(lhloCommand(smtp.host))
   await smtp.checkReply("250")
 
-proc readEhlo(smtp: Smtp): Future[bool] {.async.} =
-  ## Skips "250-" lines, read until "250 " found.
-  ## Return `true` if server supports `EHLO`, false otherwise.
-  while true:
-    var line = await smtp.readLine
-    if line.startsWith("250-"):
-      continue
-    elif line.startsWith("250 "):
-      return true # last line
-    else:
-      return false
-
 proc ehlo*(smtp: Smtp): Future[bool] {.async.} =
   ## Sends EHLO request.
+  ## Return `true` if server supports `EHLO`, false otherwise.
   await smtp.send(ehloCommand(smtp.host))
-  return await smtp.readEhlo
+  let reply = await smtp.read
+  return reply.startsWith("250")
 
 proc cleanupResources(smtp: Smtp) {.async.} =
   ## Close all open streams and transport on the smtp object.
